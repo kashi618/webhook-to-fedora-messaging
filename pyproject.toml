@@ -9,7 +9,7 @@ authors = [
   "Fedora Infrastructure <admin@fedoraproject.org>"
 ]
 keywords = [
-  "fedora", 
+  "fedora",
   "amqp"
 ]
 
