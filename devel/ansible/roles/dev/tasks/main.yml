@@ -8,6 +8,9 @@
       - krb5-devel
       - libpq-devel
       - gcc
+      - sqlite3
+      - git
+      - vim
     state: present
 
 - name: install python deps with poetry
@@ -15,12 +18,42 @@
   become: true
   become_user: vagrant
   args:
-    chdir: /home/vagrant/{{ name }}/
+    chdir: /home/vagrant/webhook-to-fedora-messaging
 
-- name: compile the translations
-  shell:
-    cmd: poetry run pybabel compile -d /home/vagrant/{{ name }}/{{ pkg_name }}/translations
-    # "removes" == "only if the file exists"
-    removes: /home/vagrant/{{ name }}/{{ pkg_name }}/translations/messages.pot
-  become: true
+- name: copy the config files
+  copy:
+    src: config.toml
+    dest: /home/vagrant/config.toml
+    mode: 0644
+    owner: vagrant
+    group: vagrant
+  loop:
+    - tahrir.cfg
+
+- name: Create or update the database
+  command: poetry run flask -A webhook_to_fedora_messaging.main db sync
+  environment:
+    W2FM_APPCONFIG: /home/vagrant/config.toml
+    FLASK_DEBUG: 1
+  become: yes
   become_user: vagrant
+  args:
+    chdir: /home/vagrant/webhook-to-fedora-messaging
+    creates: /home/vagrant/w2fm.db
+
+- name: Install the systemd unit files
+  copy:
+    src: "{{ item }}"
+    dest: /etc/systemd/system/{{ item }}
+    mode: 0644
+  loop:
+    - w2fm.service
+
+- name: Enable and start services using systemd
+  systemd:
+    name: "{{ item }}"
+    daemon_reload: yes
+    enabled: yes
+    state: started
+  loop:
+    - w2fm.service

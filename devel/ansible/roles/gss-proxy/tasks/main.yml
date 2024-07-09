@@ -1,0 +1,27 @@
+---
+- name: Install RPM packages
+  dnf:
+    name:
+      - gssproxy
+    state: present
+
+- name: Get the keytab
+  import_role:
+    name: ipa-keytab
+  vars:
+    keytab_directory: /var/lib/gssproxy
+
+- name: Copy gssproxy conf
+  template:
+    src: gssproxy.conf
+    dest: /etc/gssproxy/98-{{ krb_service | lower}}.conf
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Enable and restart GSSProxy
+  systemd:
+    state: restarted
+    name: gssproxy
+    enabled: yes
+    daemon_reload: yes
