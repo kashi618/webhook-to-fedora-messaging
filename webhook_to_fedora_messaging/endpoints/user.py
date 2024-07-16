@@ -1,16 +1,13 @@
-from flask import Blueprint, Flask, request, Response, Request
+from flask import request
 from ..database import db
 from ..models.user import User
+from . import endpoints
 from sqlalchemy_helpers import get_or_create
 from .util import success, bad_request, conflict, created, not_found, validate_request, unprocessable_entity
 
 
-app = Flask(__name__)
-user_endpoint = Blueprint("user_endpoint", __name__)
-
-
-@user_endpoint.route("/user", methods=["POST"])
 @validate_request
+@endpoints.route("/user", methods=["POST"])
 def create_user():
     """Used for creating a new user by sending a post request to /user/ path.
 
@@ -25,9 +22,9 @@ def create_user():
     else:
         return created({'message': 'Created', 'uuid': user.id})
         
-    
-@user_endpoint.route("/user/search", methods=["GET"])
+        
 @validate_request
+@endpoints.route("/user/search", methods=["GET"])
 def get_user():
     """Used for retrieving a user by sending a get request to /user/search path.
 
@@ -42,9 +39,9 @@ def get_user():
     else:
         return success({'user_list': users})
     
-    
-@user_endpoint.route("/user", methods=["GET"])
+
 @validate_request
+@endpoints.route("/user", methods=["GET"])
 def lookup_user():
     """Used for searching a user by sending a get request to /user/ path.
 

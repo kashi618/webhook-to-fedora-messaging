@@ -10,12 +10,16 @@ def bad_request() -> Response:
     return abort(400, 'Bad Request')
 
 
+def success(data: dict) -> Response:
+    return data, 200
+
+
+def created() -> Response:
+    return {'message': 'Created'}, 201
+
+
 def conflict(data: dict) -> Response:
     return abort(409, data)
-
-
-def validate_request(request: dict, fields=['username']):
-    return all(field in request for field in fields)
 
 
 def unprocessable_entity() -> Response:

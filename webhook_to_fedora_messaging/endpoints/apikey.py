@@ -1,16 +1,13 @@
 from flask import Blueprint, Flask, request, Response, Request
+from . import endpoints
 from ..database import db
-from ..models.apikey import APIKey
 from ..models.user import User
 from datetime import datetime
 from sqlalchemy_helpers import get_or_create
 from .util import not_found, success, bad_request, created, conflict, validate_request
 
-app = Flask(__name__)
-apikey_endpoint = Blueprint("apikey_endpoint", __name__)
 
-
-@apikey_endpoint.route("/apikey", methods=["POST"])
+@endpoints.route("/apikey", methods=["POST"])
 @validate_request
 def create_apikey():
     """
@@ -32,7 +29,7 @@ def create_apikey():
         return created({'message': 'Created', 'uuid': apikey.id, 'code': apikey.token})
         
     
-@apikey_endpoint.route("/apikey/search", methods=["GET"])
+@endpoints.route("/apikey/search", methods=["GET"])
 def list_apikey():
     
     session = db.Session()
@@ -45,7 +42,7 @@ def list_apikey():
     return success({'apikey_list': apikeys})
     
     
-@apikey_endpoint.route("/apikey", methods=["GET"])
+@endpoints.route("/apikey", methods=["GET"])
 @validate_request(['apikey_uuid'])
 def lookup_apikey():
     session = db.Session()
@@ -58,7 +55,7 @@ def lookup_apikey():
         return success({'uuid': apikey.id, 'name': apikey.name, 'valid_till': valid_till, 'valid': not apikey.disabled})
     
 
-@apikey_endpoint.route("/apikey/revoke", methods=["PUT"])
+@endpoints.route("/apikey/revoke", methods=["PUT"])
 @validate_request(['apikey_uuid', 'username'])
 def revoke_service():
     session = db.Session()
@@ -70,4 +67,3 @@ def revoke_service():
         apikey.disabled = True
         session.commit()
         return success({'uuid': apikey.id, 'is_valid': not apikey.disabled})
-    
