@@ -96,10 +96,8 @@ jobs:
     strategy:
       matrix:
         pyver:
-          - py38
-          - py39
-          - py310
           - py311
+          - py312
 
 
   # https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
