@@ -14,19 +14,10 @@ import pytest
             404,
             id="USER Endpoint - 404 Not Found",
         ),
-        pytest.param(
-            {"password": ""},
-            400,
-            id="USER Endpoint - 400 Bad Request"
-        ),
-        pytest.param(
-            None,
-            415,
-            id="USER Endpoint - 415 Unsupported Media Type"
-        )
-    ]
+        pytest.param({"password": ""}, 400, id="USER Endpoint - 400 Bad Request"),
+        pytest.param(None, 415, id="USER Endpoint - 415 Unsupported Media Type"),
+    ],
 )
-
 @pytest.mark.usefixtures("create_user")
 def test_user_get(client, data, code):
     response = client.get("/user/search", json=data)

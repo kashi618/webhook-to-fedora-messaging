@@ -6,10 +6,10 @@ import logging
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
-
-from webhook_to_fedora_messaging.main import create_app
-from webhook_to_fedora_messaging.database import Base
 from sqlalchemy_helpers.flask_ext import get_url_from_app
+
+from webhook_to_fedora_messaging.database import Base
+from webhook_to_fedora_messaging.main import create_app
 
 
 # this is the Alembic Config object, which provides

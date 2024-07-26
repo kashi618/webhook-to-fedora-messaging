@@ -14,17 +14,9 @@ import pytest
             404,
             id="SERVICE Endpoint - 404 Not Found",
         ),
-        pytest.param(
-            {"user": "mehmet"},
-            400,
-            id="SERVICE Endpoint - 400 Bad Request"
-        ),
-        pytest.param(
-            None,
-            415,
-            id="SERVICE Endpoint - 415 Unsupported Media Type"
-        )
-    ]
+        pytest.param({"user": "mehmet"}, 400, id="SERVICE Endpoint - 400 Bad Request"),
+        pytest.param(None, 415, id="SERVICE Endpoint - 415 Unsupported Media Type"),
+    ],
 )
 @pytest.mark.usefixtures("create_user")
 def test_service_list(client, data, code):

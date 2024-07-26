@@ -2,17 +2,17 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import pytest  # noqa: F401
-
-from webhook_to_fedora_messaging.database import db  # noqa: F401
-from sqlalchemy_helpers import get_or_create
-from webhook_to_fedora_messaging.main import create_app
 from os import environ
-from webhook_to_fedora_messaging.models.user import User
-from webhook_to_fedora_messaging.models.service import Service
 from os.path import abspath, basename
-from webhook_to_fedora_messaging.models.user import User
+
+import pytest
+from sqlalchemy_helpers import get_or_create
+
+from webhook_to_fedora_messaging.database import db
+from webhook_to_fedora_messaging.main import create_app
 from webhook_to_fedora_messaging.models.service import Service
+from webhook_to_fedora_messaging.models.user import User
+
 
 @pytest.fixture(scope="session")
 def client():
@@ -28,7 +28,9 @@ def client():
 def create_user(client):
     with client.application.app_context():
         # Setup code to create the object in the database
-        user, is_created = get_or_create(db.session, User, username="mehmet") # Adjust fields as necessary
+        user, is_created = get_or_create(
+            db.session, User, username="mehmet"
+        )  # Adjust fields as necessary
         db.session.commit()
 
     yield
@@ -37,17 +39,26 @@ def create_user(client):
         # Teardown code to remove the object from the database
         db.session.query(User).filter_by(username="mehmet").delete()
         db.session.commit()
-    
-    
+
+
 @pytest.fixture(autouse=False, scope="function")
 def create_service(client):
     with client.application.app_context():
         # Setup code to create the object in the database
-        user, created = get_or_create(db.session, User, username="mehmet") # Adjust fields as necessary
+        user, created = get_or_create(
+            db.session, User, username="mehmet"
+        )  # Adjust fields as necessary
 
-        service, created = get_or_create(db.session, Service, name="GitHub Demo", type="GitHub", desc="description", user_id=user.id)
+        service, created = get_or_create(
+            db.session,
+            Service,
+            name="GitHub Demo",
+            type="GitHub",
+            desc="description",
+            user_id=user.id,
+        )
 
-        service.token = "43b901cba25c458a9175ef119a9603bb"
+        service.token = "dummy-service-token"  # noqa: S105
         db.session.commit()
         db.session.refresh(service)
 
@@ -58,4 +69,3 @@ def create_service(client):
         db.session.query(User).filter_by(username="mehmet").delete()
         db.session.query(Service).filter_by(name="GitHub Demo").delete()
         db.session.commit()
-

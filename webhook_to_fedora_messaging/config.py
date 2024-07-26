@@ -9,7 +9,9 @@ from pydantic import BaseModel, ConfigDict, DirectoryPath
 from pydantic_settings import BaseSettings
 
 
-DEFAULT_CONFIG_FILE = _config_file = "/etc/webhook-to-fedora-messaging/webhook-to-fedora-messaging.cfg"
+DEFAULT_CONFIG_FILE = _config_file = (
+    "/etc/webhook-to-fedora-messaging/webhook-to-fedora-messaging.cfg"
+)
 TOP_DIR = Path(__file__).parent
 
 

@@ -1,9 +1,10 @@
-from flask import Response, request, abort
 from functools import wraps
+
+from flask import abort, request
 
 
 def validate_request(fields=None):
-    fields = fields if fields is not None else ['username']
+    fields = fields if fields is not None else ["username"]
 
     def decorator(func):
         @wraps(func)
@@ -18,12 +19,13 @@ def validate_request(fields=None):
                 return abort(400, {"error": f"Missing fields: {', '.join(missing_fields)}"})
 
             return func(*args, **kwargs)
+
         return wrapper
 
     # If the decorator is used without arguments
     if callable(fields):
         func = fields
-        fields = ['username']
+        fields = ["username"]
         return decorator(func)
 
     return decorator

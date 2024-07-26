@@ -15,6 +15,6 @@ def get_config() -> dict:
         with open(path, "rb") as file:
             return tomllib.load(file)["flaskapp"]
     except FileNotFoundError as expt:
-        raise ConfigError(f"Configuration file '{path}' was not found")
+        raise ConfigError(f"Configuration file '{path}' was not found") from expt
     except KeyError as expt:
-        raise ConfigError(f"Configuration key '{expt}' could not be read")
+        raise ConfigError(f"Configuration key '{expt}' could not be read") from expt

@@ -3,12 +3,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 
-from sqlalchemy import Column, UnicodeText
-from sqlalchemy.types import DateTime as SQLDateTime
 from datetime import datetime, UTC
 from functools import partial
-
 from uuid import uuid4
+
+from sqlalchemy import Column, UnicodeText
+from sqlalchemy.types import DateTime as SQLDateTime
 
 
 class UUIDCreatableMixin:
@@ -24,4 +24,6 @@ class CreatableMixin:
     An SQLAlchemy mixin to store the time when an entity was created
     """
 
-    creation_date = Column("creation_date", SQLDateTime, nullable=False, default=partial(datetime.now, tz=UTC))
+    creation_date = Column(
+        "creation_date", SQLDateTime, nullable=False, default=partial(datetime.now, tz=UTC)
+    )

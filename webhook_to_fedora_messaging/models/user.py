@@ -2,10 +2,10 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from sqlalchemy import Column, Integer, UnicodeText, Boolean
-from webhook_to_fedora_messaging.models.util import UUIDCreatableMixin, CreatableMixin
+from sqlalchemy import Boolean, Column, Integer, UnicodeText
 
 from webhook_to_fedora_messaging.database import Base
+from webhook_to_fedora_messaging.models.util import CreatableMixin, UUIDCreatableMixin
 
 
 class User(Base, UUIDCreatableMixin, CreatableMixin):
