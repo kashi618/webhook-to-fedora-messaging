@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from os import environ
-from os.path import abspath, basename
+from pathlib import Path
 
 import pytest
 from sqlalchemy_helpers import get_or_create
@@ -14,18 +14,19 @@ from webhook_to_fedora_messaging.models.service import Service
 from webhook_to_fedora_messaging.models.user import User
 
 
-@pytest.fixture(scope="session")
-def client():
-    root = abspath(__name__)
-    environ["W2FM_APPCONFIG"] = root.replace(basename(root), "tests/data/test.toml")
-    with open("/tmp/w2fm-test.db", "wb") as dest:
-        with open(root.replace(basename(root), "tests/data/w2fm-test.db"), "rb") as srce:
-            dest.write(srce.read())
-    return create_app().test_client()
+@pytest.fixture()
+def client(tmp_path):
+    test_dir = Path(__file__).parent
+    environ["W2FM_APPCONFIG"] = test_dir.joinpath("data/test.toml").as_posix()
+    config = {"SQLALCHEMY_DATABASE_URI": f"sqlite:///{tmp_path.as_posix()}/w2fm.db"}
+    app = create_app(config)
+    with app.app_context():
+        db.manager.sync()
+    return app.test_client()
 
 
-@pytest.fixture(autouse=False, scope="function")
-def create_user(client):
+@pytest.fixture()
+def db_user(client):
     with client.application.app_context():
         # Setup code to create the object in the database
         user, is_created = get_or_create(
@@ -33,7 +34,7 @@ def create_user(client):
         )  # Adjust fields as necessary
         db.session.commit()
 
-    yield
+    yield user
 
     with client.application.app_context():
         # Teardown code to remove the object from the database
@@ -41,8 +42,8 @@ def create_user(client):
         db.session.commit()
 
 
-@pytest.fixture(autouse=False, scope="function")
-def create_service(client):
+@pytest.fixture()
+def db_service(client):
     with client.application.app_context():
         # Setup code to create the object in the database
         user, created = get_or_create(

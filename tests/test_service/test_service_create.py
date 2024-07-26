@@ -22,7 +22,7 @@ import pytest
         pytest.param(None, 415, id="SERVICE Endpoint - 415 Unsupported Media Type"),
     ],
 )
-@pytest.mark.usefixtures("create_user")
+@pytest.mark.usefixtures("db_user")
 def test_service_create(client, data, code):
     response = client.post("/service/", json=data)
     assert response.status_code == code
@@ -38,7 +38,7 @@ def test_service_create(client, data, code):
         )
     ],
 )
-@pytest.mark.usefixtures("create_user")
+@pytest.mark.usefixtures("db_user")
 def test_service_conflict(client, data, code):
     response = client.post("/service/", json=data)
     response = client.post("/service/", json=data)

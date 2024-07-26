@@ -49,15 +49,13 @@ def fasjson_client():
         yield client
 
 
-def test_message_create(client, create_service, request_data, fasjson_client):
+def test_message_create(client, db_service, request_data, fasjson_client):
     fasjson_client.search.return_value = SimpleNamespace(
         result=[{"username": "dummy-fas-username"}]
     )
-    headers = get_headers(create_service, request_data)
+    headers = get_headers(db_service, request_data)
     with mock_sends(GithubMessageV1) as sent_msgs:
-        response = client.post(
-            f"/message/{create_service.uuid}", data=request_data, headers=headers
-        )
+        response = client.post(f"/message/{db_service.uuid}", data=request_data, headers=headers)
         print(response.data)
         assert response.status_code == 200
     sent_msg = sent_msgs[0]
@@ -67,10 +65,10 @@ def test_message_create(client, create_service, request_data, fasjson_client):
     assert sent_msg.body["body"] == json.loads(request_data)
 
 
-def test_message_create_400(client, create_service, request_data):
-    headers = get_headers(create_service, request_data)
+def test_message_create_400(client, db_service, request_data):
+    headers = get_headers(db_service, request_data)
     headers["X-Hub-Signature-256"] = ""
-    response = client.post(f"/message/{create_service.uuid}", data=request_data, headers=headers)
+    response = client.post(f"/message/{db_service.uuid}", data=request_data, headers=headers)
     assert response.status_code == 400
 
 
@@ -79,6 +77,6 @@ def test_message_create_404(client):
     assert response.status_code == 404
 
 
-def test_message_create_415(client, create_service):
-    response = client.post(f"/message/{create_service.uuid}", data="not json")
+def test_message_create_415(client, db_service):
+    response = client.post(f"/message/{db_service.uuid}", data="not json")
     assert response.status_code == 415

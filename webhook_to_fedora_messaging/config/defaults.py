@@ -8,9 +8,9 @@ class Defaults:
     # The session information will be retained for 6 months
     PERMANENT_SESSION_LIFETIME = 604800
     SESSION_COOKIE_NAME = "user"
+    FASJSON_URL = "https://fasjson.fedoraproject.org"
 
 
-FASJSON_URL = "https://fasjson.fedoraproject.org"
 LOGGER_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,

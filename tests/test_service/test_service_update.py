@@ -1,5 +1,5 @@
-def test_service_update(client, create_service):
-    data = {"service_uuid": create_service.uuid, "username": "mehmet", "name": "new name"}
+def test_service_update(client, db_service):
+    data = {"service_uuid": db_service.uuid, "username": "mehmet", "name": "new name"}
     response = client.put("/service/", json=data)
     assert response.status_code == 200
 

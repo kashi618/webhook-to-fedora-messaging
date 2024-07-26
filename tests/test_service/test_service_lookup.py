@@ -1,5 +1,5 @@
-def test_service_lookup(client, create_service):
-    data = {"service_uuid": create_service.uuid}
+def test_service_lookup(client, db_service):
+    data = {"service_uuid": db_service.uuid}
     response = client.get("/service/", json=data)
     assert response.status_code == 200
 

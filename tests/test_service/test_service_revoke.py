@@ -1,11 +1,11 @@
-def test_service_revoke(client, create_service):
-    data = {"service_uuid": create_service.uuid, "username": "mehmet"}
+def test_service_revoke(client, db_service):
+    data = {"service_uuid": db_service.uuid, "username": "mehmet"}
     response = client.put("/service/revoke", json=data)
     assert response.status_code == 200
 
 
-def test_service_revoke_404(client, create_service):
-    data = {"service_uuid": create_service.uuid, "username": "not-existent-user"}
+def test_service_revoke_404(client, db_service):
+    data = {"service_uuid": db_service.uuid, "username": "not-existent-user"}
     response = client.put("/service/revoke", json=data)
     assert response.status_code == 404
 

@@ -1,5 +1,5 @@
-def test_service_refresh(client, create_service):
-    data = {"service_uuid": create_service.uuid}
+def test_service_refresh(client, db_service):
+    data = {"service_uuid": db_service.uuid}
     response = client.post("/service/token", json=data)
     assert response.status_code == 200
 

@@ -18,7 +18,7 @@ import pytest
         pytest.param(None, 415, id="SERVICE Endpoint - 415 Unsupported Media Type"),
     ],
 )
-@pytest.mark.usefixtures("create_user")
+@pytest.mark.usefixtures("db_user")
 def test_service_list(client, data, code):
     response = client.get("/service/search", json=data)
     assert response.status_code == code

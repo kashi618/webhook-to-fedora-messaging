@@ -23,7 +23,7 @@ from .endpoints.service import service_endpoint
 from .endpoints.user import user_endpoint
 
 
-def create_app():
+def create_app(config=None):
     # Instantiate a barebones Flask application
     app = Flask("webhook_to_fedora_messaging")
     # First attempt loading the defaults from the Defaults object
@@ -42,6 +42,9 @@ def create_app():
         raise
 
     app.config.from_mapping(confdata)
+    # Load the config passed as argument
+    app.config.update(config or {})
+
     db.init_app(app)
     dictConfig(confdata["logsconf"])
 
