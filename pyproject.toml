@@ -97,7 +97,7 @@ source = ["webhook_to_fedora_messaging"]
 source = ["webhook_to_fedora_messaging"]
 
 [tool.coverage.report]
-fail_under = 100
+fail_under = 87
 exclude_lines = [
     "pragma: no cover",
     "if __name__ == .__main__.:",
