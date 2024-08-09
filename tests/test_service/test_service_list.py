@@ -1,5 +1,5 @@
-async def test_service_list(client, client_auth, db_service):
-    response = await client.get("/api/v1/services", auth=client_auth)
+async def test_service_list(client, authenticated, db_service):
+    response = await client.get("/api/v1/services")
     assert response.status_code == 200
     assert response.json() == {
         "data": [

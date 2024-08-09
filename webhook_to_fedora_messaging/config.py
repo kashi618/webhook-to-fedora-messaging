@@ -5,8 +5,9 @@
 import os
 from functools import cache
 from pathlib import Path
+from secrets import token_urlsafe
 
-from pydantic import BaseModel, DirectoryPath, FilePath
+from pydantic import BaseModel, DirectoryPath
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -32,12 +33,29 @@ class DBModel(BaseModel):
     alembic: AlembicModel = AlembicModel()
 
 
+class OIDCModel(BaseModel):
+    provider_url: str = "https://id.fedoraproject.org/openidc"
+    client_id: str = "w2fm"
+    scopes: str = " ".join(
+        [
+            "openid",
+            "email",
+            "profile",
+            "https://id.fedoraproject.org/scope/groups",
+            "https://id.fedoraproject.org/scope/agreements",
+        ]
+    )
+
+
 class Config(BaseSettings):
     model_config = SettingsConfigDict(env_nested_delimiter="__")
 
     database: DBModel = DBModel()
     fasjson_url: str = "https://fasjson.fedoraproject.org"
-    logging_config: FilePath = "/etc/webhook-to-fedora-messaging/logging.yaml"
+    logging_config: Path = "/etc/webhook-to-fedora-messaging/logging.yaml"
+    oidc: OIDCModel = OIDCModel()
+    # It's fine if it changes on each startup: it's only used to temporarily store auth sessions
+    session_secret: str = token_urlsafe(42)
 
 
 @cache

@@ -6,7 +6,7 @@ import click
 
 from webhook_to_fedora_messaging import __version__
 from webhook_to_fedora_messaging.config import set_config_file
-from webhook_to_fedora_messaging.database import setup_database
+from webhook_to_fedora_messaging.database import get_db_manager, setup_database
 
 
 logger = logging.getLogger(__name__)
@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 def main(conf=None):
     if conf:
         set_config_file(os.path.abspath(conf))
+        get_db_manager.cache_clear()
 
 
 @main.command(name="setup", help="Setup the database schema in the specified environment")

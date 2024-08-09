@@ -3,9 +3,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from typing import AsyncGenerator
+from unittest import mock
 
 import pytest
-from httpx import AsyncClient, BasicAuth
+from httpx import ASGITransport, AsyncClient
 
 from webhook_to_fedora_messaging import database
 from webhook_to_fedora_messaging.config import set_config_file
@@ -47,7 +48,8 @@ async def db_session(db):
 @pytest.fixture()
 async def client(app_config, db):
     app = create_app()
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
 
 
@@ -69,8 +71,16 @@ async def db_user(client, db_session) -> AsyncGenerator[User, None]:
 
 
 @pytest.fixture()
-async def client_auth(db_user):
-    return BasicAuth(username=db_user.name, password=db_user.name)
+async def authenticated(db_user, client):
+    oidc_user = {
+        "nickname": db_user.name,
+        "email": f"{db_user.name}@example.com",
+        "sub": "dummyusersub",
+    }
+    with mock.patch("webhook_to_fedora_messaging.auth.oauth") as oauth:
+        oauth.fedora.userinfo = mock.AsyncMock(return_value=oidc_user)
+        client.headers = {"Authorization": "Bearer dummy-token"}
+        yield oauth
 
 
 @pytest.fixture()

@@ -34,6 +34,9 @@ def get_db_manager():
 
 async def setup_database():
     db = get_db_manager()
+    # Populate Base.metadata
+    from . import models  # noqa: F401
+
     await db.sync()
 
 

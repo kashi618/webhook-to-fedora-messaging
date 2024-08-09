@@ -1,46 +1,77 @@
-from fastapi import Depends, HTTPException, Security
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
-from sqlalchemy import select
-from sqlalchemy.exc import NoResultFound
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
-from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
+import logging
+from typing import Optional
 
-from webhook_to_fedora_messaging.database import get_session
+from authlib.integrations.starlette_client import OAuth
+from fastapi import Depends, HTTPException
+from fastapi.security import OpenIdConnect
+from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.status import HTTP_401_UNAUTHORIZED
+
+from webhook_to_fedora_messaging.config import get_config
+from webhook_to_fedora_messaging.database import get_or_create, get_session
 from webhook_to_fedora_messaging.models import User
 
 
-def user_factory(optional: bool = False, **kwargs):
-    """
-    Factory creating FastAPI dependencies for authenticating users
-    """
-    if optional:
-        kwargs["auto_error"] = False
-    security = HTTPBasic(realm="W2FM", **kwargs)
+log = logging.getLogger(__name__)
 
-    async def user_actual(
-        session: AsyncSession = Depends(get_session),  # noqa : B008
-        cred: HTTPBasicCredentials = Security(security),  # noqa : B008
-    ):
-        if not cred:
-            if not optional:
-                raise HTTPException(HTTP_403_FORBIDDEN)
-            else:
-                return None
-        username, password = cred.username, cred.password
+config = get_config()
+metadata_url = f"{config.oidc.provider_url.rstrip('/')}/.well-known/openid-configuration"
 
-        query = select(User).filter_by(name=username).options(selectinload("*"))
-        result = await session.execute(query)
+oidc = OpenIdConnect(
+    openIdConnectUrl=metadata_url,
+    scheme_name="OpenID Connect",
+)
+oauth = OAuth()
+oauth.register(
+    "fedora",
+    server_metadata_url=metadata_url,
+    # client_id=standard.oidc_client_id,
+    # client_kwargs={"scope": "openid email offline_access profile"},
+    # client_secret=standard.oidc_client_secret,
+)
 
-        try:
-            user_data = result.scalar_one()
-        except NoResultFound as expt:
-            raise HTTPException(HTTP_401_UNAUTHORIZED, "Username not found") from expt
 
-        # Do not worry - We will move on from basic HTTP authentication to OpenID Connect
-        if password != username:
-            raise HTTPException(HTTP_403_FORBIDDEN, "Invalid credentials")
+class OIDCUser(BaseModel):
+    nickname: str
+    email: str
+    name: str = None
+    preferred_username: str = None
+    groups: list[str] = Field(default_factory=list)
+    sub: str
 
-        return user_data
 
-    return user_actual
+async def current_user(
+    token: Optional[str] = Depends(oidc),
+    session: AsyncSession = Depends(get_session),  # noqa : B008
+):
+    # Read the token
+    try:
+        token_type, token = token.split(" ", 1)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=HTTP_401_UNAUTHORIZED,
+            detail="Can't read the token",
+        ) from e
+    if token_type.lower() != "bearer":
+        raise HTTPException(
+            status_code=HTTP_401_UNAUTHORIZED,
+            detail="Supplied token is not a Bearer token",
+        )
+    # Query user information
+    try:
+        userinfo = await oauth.fedora.userinfo(token={"access_token": token})
+    except Exception as e:
+        raise HTTPException(
+            status_code=HTTP_401_UNAUTHORIZED,
+            detail=f"Supplied authentication could not be validated ({e})",
+        ) from e
+    oidc_user = OIDCUser(**userinfo)
+    username = oidc_user.preferred_username or oidc_user.nickname
+    # Add to the DB if needed
+    user, created = await get_or_create(session, User, name=username)
+    if created:
+        log.info(f"User {username} logged in for the first time and was added to the database")
+    else:
+        log.info(f"User {username} logged in")
+    return user

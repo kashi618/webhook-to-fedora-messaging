@@ -20,8 +20,42 @@
   args:
     chdir: /home/vagrant/webhook-to-fedora-messaging
 
+# Add Tinystage's root CA to the CA bundle
+- name: Get the content of the CA cert
+  slurp:
+    src: /etc/ipa/ca.crt
+  register: ca_crt
+- name: Find where certifi's CA bundle is located
+  command:
+    cmd: poetry run python -c "import certifi; print(certifi.where())"
+    chdir: /home/vagrant/webhook-to-fedora-messaging/
+  become: true
+  become_user: vagrant
+  register: _ca_bundle_path
+  changed_when: False
+- name: Put tinystage root CA in the list of CAs
+  blockinfile:
+    block: "{{ ca_crt.content | b64decode }}"
+    path: "/etc/pki/tls/certs/ca-bundle.crt"
+- name: Put tinystage root CA in the list of CA's for certifi
+  blockinfile:
+    block: "{{ ca_crt.content | b64decode }}"
+    path: "{{ _ca_bundle_path.stdout }}"
+  become: true
+  become_user: vagrant
+
+# Authentication
+- name: get the OIDC config
+  ansible.builtin.slurp:
+    src: /home/vagrant/frontend_oidc.json
+  register: oidc_config
+
+- name: extract the OIDC client_id
+  set_fact:
+    oidc_client_id: "{{ oidc_config['content'] | b64decode | from_json | json_query('web.client_id') }}"
+
 - name: copy the config file
-  copy:
+  template:
     src: w2fm.cfg
     dest: /home/vagrant/w2fm.cfg
     mode: 0644

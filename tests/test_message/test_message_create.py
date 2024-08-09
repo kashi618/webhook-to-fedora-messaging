@@ -53,7 +53,7 @@ async def test_message_create(client, db_service, request_data, request_headers,
     )
     with mock_sends(GithubMessageV1) as sent_msgs:
         response = await client.post(
-            f"/api/v1/messages/{db_service.uuid}", data=request_data, headers=request_headers
+            f"/api/v1/messages/{db_service.uuid}", content=request_data, headers=request_headers
         )
         assert response.status_code == 202, response.text
     sent_msg = sent_msgs[0]
@@ -67,7 +67,7 @@ async def test_message_create(client, db_service, request_data, request_headers,
 async def test_message_create_400(client, db_service, request_data, request_headers):
     request_headers["X-Hub-Signature-256"] = ""
     response = await client.post(
-        f"/api/v1/messages/{db_service.uuid}", data=request_data, headers=request_headers
+        f"/api/v1/messages/{db_service.uuid}", content=request_data, headers=request_headers
     )
     assert response.status_code == 400
 
@@ -78,5 +78,5 @@ async def test_message_create_404(client):
 
 
 async def test_message_create_bad_request(client, db_service):
-    response = await client.post(f"/api/v1/messages/{db_service.uuid}", data="not json")
+    response = await client.post(f"/api/v1/messages/{db_service.uuid}", content="not json")
     assert response.status_code == 422

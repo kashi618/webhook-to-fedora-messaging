@@ -13,7 +13,7 @@ from starlette.status import (
     HTTP_422_UNPROCESSABLE_ENTITY,
 )
 
-from webhook_to_fedora_messaging.auth import user_factory
+from webhook_to_fedora_messaging.auth import current_user
 from webhook_to_fedora_messaging.database import get_session
 from webhook_to_fedora_messaging.endpoints.models.service import (
     ServiceExternal,
@@ -34,7 +34,7 @@ router = APIRouter(prefix="/services")
 async def create_service(
     body: ServiceRequest,
     session: AsyncSession = Depends(get_session),  # noqa : B008
-    user: User = Depends(user_factory()),  # noqa : B008
+    user: User = Depends(current_user),  # noqa : B008
 ):
     """
     Create a service with the requested attributes
@@ -58,7 +58,7 @@ async def create_service(
 @router.get("", status_code=HTTP_200_OK, response_model=ServiceManyResult, tags=["services"])
 async def list_services(
     session: AsyncSession = Depends(get_session),  # noqa : B008
-    user: User = Depends(user_factory()),  # noqa : B008
+    user: User = Depends(current_user),  # noqa : B008
 ):
     """
     List all the services associated with a certain user

@@ -10,7 +10,10 @@ custom configuration file will be inherently taken from the default values
 import logging
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 
+from webhook_to_fedora_messaging.config import get_config
 from webhook_to_fedora_messaging.endpoints import message, service, user
 
 
@@ -35,6 +38,7 @@ PREFIX = "/api/v1"
 
 
 def create_app() -> FastAPI:
+    config = get_config()
     app = FastAPI(
         title="Webhook To Fedora Messaging",
         description=desc,
@@ -43,9 +47,28 @@ def create_app() -> FastAPI:
             "email": "infrastructure@lists.fedoraproject.org",
         },
         openapi_tags=tags_metadata,
+        swagger_ui_init_oauth={
+            "clientId": config.oidc.client_id,
+            "clientSecret": "",
+            "scopes": config.oidc.scopes,
+        },
         # lifespan=lifespan,
     )
 
+    # We need this for auth to save temporary code & state in session.
+    # We don't need an actual secret key, a random one is fine, since the auth data is only there
+    # during the auth process.
+    app.add_middleware(SessionMiddleware, secret_key=config.session_secret)
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # Routes
     app.include_router(user.router, prefix=PREFIX)
     app.include_router(service.router, prefix=PREFIX)
     app.include_router(message.router, prefix=PREFIX)

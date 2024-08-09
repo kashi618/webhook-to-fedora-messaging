@@ -16,8 +16,8 @@ import pytest
         ),
     ],
 )
-async def test_user_get(client, client_auth, db_user, username, code):
-    response = await client.get(f"/api/v1/users/{username}", auth=client_auth)
+async def test_user_get(client, authenticated, db_user, username, code):
+    response = await client.get(f"/api/v1/users/{username}")
     assert response.status_code == code
     if code == 200:
         assert response.json() == {

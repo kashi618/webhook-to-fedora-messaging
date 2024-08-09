@@ -16,4 +16,8 @@
     - ipa-client
     - cert
     - gss-proxy
+    - name: oidc-register
+      redirect_url: https://{{ ansible_fqdn }}/docs/oauth2-redirect
+      public_client: true
+      dest: /home/vagrant/frontend_oidc.json
     - dev

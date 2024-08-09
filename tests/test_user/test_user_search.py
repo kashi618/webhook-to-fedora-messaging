@@ -1,5 +1,5 @@
-async def test_user_search(client, client_auth, db_user):
-    response = await client.get("/api/v1/users/search/met", auth=client_auth)
+async def test_user_search(client, db_user):
+    response = await client.get("/api/v1/users/search/met")
     assert response.status_code == 200
     assert response.json() == {
         "data": [

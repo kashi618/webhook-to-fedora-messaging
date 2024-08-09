@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_422_UNPROCESSABLE_ENTITY
 
-from webhook_to_fedora_messaging.auth import user_factory
+from webhook_to_fedora_messaging.auth import current_user
 from webhook_to_fedora_messaging.database import get_session
 from webhook_to_fedora_messaging.models.service import Service
 from webhook_to_fedora_messaging.models.user import User
@@ -33,7 +33,7 @@ async def return_service_from_uuid(
 
 async def authorized_service_from_uuid(
     service: Service = Depends(return_service_from_uuid),  # noqa : B008
-    user: User = Depends(user_factory()),  # noqa : B008
+    user: User = Depends(current_user),  # noqa : B008
 ) -> Service:
     if service.user_id != user.id:
         raise HTTPException(

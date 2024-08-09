@@ -17,8 +17,8 @@ import pytest
     ],
 )
 @pytest.mark.usefixtures("db_user")
-async def test_service_create(client, client_auth, data, code):
-    response = await client.post("/api/v1/services", auth=client_auth, json={"data": data})
+async def test_service_create(client, authenticated, data, code):
+    response = await client.post("/api/v1/services", json={"data": data})
     assert response.status_code == code, response.text
     if code == 201:
         result = response.json()
@@ -27,12 +27,12 @@ async def test_service_create(client, client_auth, data, code):
             assert result["data"][prop] == data[prop]
 
 
-async def test_service_conflict(client, client_auth, db_service, db_user):
+async def test_service_conflict(client, authenticated, db_service, db_user):
     data = {
         "name": db_service.name,
         "type": db_service.type,
         "desc": db_service.desc,
     }
 
-    response = await client.post("/api/v1/services", auth=client_auth, json={"data": data})
+    response = await client.post("/api/v1/services", json={"data": data})
     assert response.status_code == 409
