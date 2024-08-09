@@ -8,18 +8,33 @@ import pytest
 from httpx import AsyncClient, BasicAuth
 
 from webhook_to_fedora_messaging import database
-from webhook_to_fedora_messaging.config import setup_database_manager, standard
+from webhook_to_fedora_messaging.config import set_config_file
+from webhook_to_fedora_messaging.database import get_db_manager
 from webhook_to_fedora_messaging.main import create_app
 from webhook_to_fedora_messaging.models.service import Service
 from webhook_to_fedora_messaging.models.user import User
 
 
 @pytest.fixture()
-async def db(tmp_path):
-    standard.database_url = f"sqlite:///{tmp_path.as_posix()}/w2fm.db"
-    setup_database_manager()
-    await database.db.sync()
-    yield database.db
+async def app_config(tmp_path):
+    config_path = tmp_path.joinpath("app.cfg")
+    database_url = f"sqlite:///{tmp_path.as_posix()}/w2fm.db"
+    with open(config_path, "w") as fh:
+        fh.write(
+            f"""
+DATABASE__SQLALCHEMY__URL = "{database_url}"
+LOGGING_CONFIG = "logging.yaml.example"
+"""
+        )
+    set_config_file(config_path.as_posix())
+
+
+@pytest.fixture()
+async def db(app_config):
+    get_db_manager.cache_clear()
+    db_mgr = get_db_manager()
+    await db_mgr.sync()
+    yield db_mgr
 
 
 @pytest.fixture()
@@ -30,7 +45,7 @@ async def db_session(db):
 
 
 @pytest.fixture()
-async def client(db):
+async def client(app_config, db):
     app = create_app()
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client

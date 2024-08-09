@@ -6,7 +6,7 @@ import fasjson_client
 from starlette.requests import Request
 from webhook_to_fedora_messaging_messages.github import GithubMessageV1
 
-from webhook_to_fedora_messaging.config import standard
+from webhook_to_fedora_messaging.config import get_config
 from webhook_to_fedora_messaging.exceptions import SignatureMatchError
 
 
@@ -60,7 +60,7 @@ def fas_by_github(username: str) -> str:
     Args:
         username: GitHub Username"""
 
-    fasjson = fasjson_client.Client(standard.fasjson_url)
+    fasjson = fasjson_client.Client(get_config().fasjson_url)
     response = fasjson.search(github_username=username)
     if response.result and len(response.result) == 1:
         return response.result[0]["username"]

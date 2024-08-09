@@ -22,8 +22,8 @@
 
 - name: copy the config file
   copy:
-    src: config.toml
-    dest: /home/vagrant/config.toml
+    src: w2fm.cfg
+    dest: /home/vagrant/w2fm.cfg
     mode: 0644
     owner: vagrant
     group: vagrant

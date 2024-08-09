@@ -7,7 +7,7 @@ import logging
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from webhook_to_fedora_messaging.config import standard
+from webhook_to_fedora_messaging.config import get_config
 from webhook_to_fedora_messaging.database import Base
 
 
@@ -29,7 +29,7 @@ logger = logging.getLogger("alembic.env")
 # my_important_option = alembic_config.get_main_option("my_important_option")
 # ... etc.
 
-url = standard.database_url
+url = get_config().database.sqlalchemy.url
 alembic_config.set_main_option("sqlalchemy.url", url)
 
 

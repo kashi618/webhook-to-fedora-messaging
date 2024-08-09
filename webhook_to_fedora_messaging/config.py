@@ -2,25 +2,25 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import os
 from functools import cache
 from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict, DirectoryPath
-from pydantic_settings import BaseSettings
+from pydantic import BaseModel, DirectoryPath, FilePath
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-DEFAULT_CONFIG_FILE = _config_file = (
-    "/etc/webhook-to-fedora-messaging/webhook-to-fedora-messaging.cfg"
+DEFAULT_CONFIG_FILE = _config_file = os.getenv(
+    "W2FM_CONFIG", "/etc/webhook-to-fedora-messaging/webhook-to-fedora-messaging.cfg"
 )
 TOP_DIR = Path(__file__).parent
 
 
 class SQLAlchemyModel(BaseModel):
-    model_config = ConfigDict(extra="allow")
+    model_config = SettingsConfigDict(extra="allow")
 
     url: str = f"sqlite:///{TOP_DIR.parent.joinpath('webhook-to-fedora-messaging.db').absolute()}"
     echo: bool = False
-    isolation_level: str = "SERIALIZABLE"
 
 
 class AlembicModel(BaseModel):
@@ -33,7 +33,11 @@ class DBModel(BaseModel):
 
 
 class Config(BaseSettings):
+    model_config = SettingsConfigDict(env_nested_delimiter="__")
+
     database: DBModel = DBModel()
+    fasjson_url: str = "https://fasjson.fedoraproject.org"
+    logging_config: FilePath = "/etc/webhook-to-fedora-messaging/logging.yaml"
 
 
 @cache
