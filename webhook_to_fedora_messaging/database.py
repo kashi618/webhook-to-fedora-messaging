@@ -17,7 +17,7 @@ from sqlalchemy_helpers.aio import (  # noqa: F401
     get_or_create,
     update_or_create,
 )
-from sqlalchemy_helpers.fastapi import AsyncDatabaseManager, make_db_session
+from sqlalchemy_helpers.fastapi import make_db_session, manager_from_config
 
 from .config import get_config
 
@@ -25,11 +25,7 @@ from .config import get_config
 @cache
 def get_db_manager():
     config = get_config()
-    return AsyncDatabaseManager(
-        config.database.sqlalchemy.url,
-        config.database.alembic.migrations_path.as_posix(),
-        # engine_args={"echo": True},
-    )
+    return manager_from_config(config.database)
 
 
 async def setup_database():
