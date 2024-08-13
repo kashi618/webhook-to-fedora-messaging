@@ -37,7 +37,7 @@ async def setup_database():
     # Populate Base.metadata
     from . import models  # noqa: F401
 
-    await db.sync()
+    return await db.sync()
 
 
 async def get_session() -> AsyncIterator[AsyncSession]:

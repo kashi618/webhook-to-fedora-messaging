@@ -6,7 +6,9 @@ import logging
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+from sqlalchemy.engine import Connection
 
+from webhook_to_fedora_messaging import models  # noqa: F401
 from webhook_to_fedora_messaging.config import get_config
 from webhook_to_fedora_messaging.database import Base
 
@@ -56,13 +58,7 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def run_migrations_online():
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
-    """
+def do_run_migrations(connection: Connection) -> None:
 
     # this callback is used to prevent an auto-migration from being generated
     # when there are no changes to the schema
@@ -74,6 +70,24 @@ def run_migrations_online():
                 directives[:] = []
                 logger.info("No changes in schema detected.")
 
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        process_revision_directives=process_revision_directives,
+    )
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+def run_sync_migrations() -> None:
+    """Run migrations in 'online' mode.
+
+    In this scenario we need to create an Engine
+    and associate a connection with the context.
+
+    """
+
     connectable = engine_from_config(
         alembic_config.get_section(alembic_config.config_ini_section),
         prefix="sqlalchemy.",
@@ -81,14 +95,16 @@ def run_migrations_online():
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata,
-            process_revision_directives=process_revision_directives,
-        )
+        do_run_migrations(connection)
 
-        with context.begin_transaction():
-            context.run_migrations()
+
+def run_migrations_online() -> None:
+    connectable = alembic_config.attributes.get("connection", None)
+
+    if connectable is None:
+        run_sync_migrations()
+    else:
+        do_run_migrations(connectable)
 
 
 if context.is_offline_mode():

@@ -3,6 +3,7 @@ import os
 from asyncio import run
 
 import click
+from sqlalchemy_helpers.aio import SyncResult
 
 from webhook_to_fedora_messaging import __version__
 from webhook_to_fedora_messaging.config import set_config_file
@@ -30,4 +31,10 @@ def main(conf=None):
 
 @main.command(name="setup", help="Setup the database schema in the specified environment")
 def setup():
-    run(setup_database())
+    result = run(setup_database())
+    if result == SyncResult.ALREADY_UP_TO_DATE:
+        click.echo("The database was already up-to-date")
+    elif result == SyncResult.CREATED:
+        click.echo("The database has been created")
+    elif result == SyncResult.UPGRADED:
+        click.echo("The database has been upgraded")
