@@ -25,3 +25,4 @@ class Service(Base, UUIDCreatableMixin, CreatableMixin):
     type = Column(UnicodeText, nullable=False)
     desc = Column(UnicodeText, nullable=False)
     disabled = Column(Boolean, nullable=False, default=False)
+    sent = Column(Integer, nullable=False, default=0)

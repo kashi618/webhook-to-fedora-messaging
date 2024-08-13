@@ -35,4 +35,5 @@ async def create_message(
         ) from expt
 
     api.publish(message)
+    service.sent += 1
     return {"data": {"message_id": message.id}}
