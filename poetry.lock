@@ -3283,4 +3283,4 @@ deploy = ["asyncpg", "gunicorn"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "f34df21cb10ce8d4893584b19c468bcc613a40d0c2c0439b9095ce231199f7ed"
+content-hash = "e36accae6acd17c2b2110f62c83179f0ab25873bf85ead5d26da654531017afc"
