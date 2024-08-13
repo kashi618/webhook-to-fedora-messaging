@@ -16,7 +16,6 @@ import pytest
         ),
     ],
 )
-@pytest.mark.usefixtures("db_user")
 async def test_service_create(client, authenticated, data, code):
     response = await client.post("/api/v1/services", json={"data": data})
     assert response.status_code == code, response.text

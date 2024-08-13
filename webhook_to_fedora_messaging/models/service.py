@@ -5,6 +5,7 @@
 from uuid import uuid4
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, UnicodeText, UniqueConstraint
+from sqlalchemy.orm import relationship
 
 from webhook_to_fedora_messaging.database import Base
 from webhook_to_fedora_messaging.models.util import CreatableMixin, UUIDCreatableMixin
@@ -18,6 +19,7 @@ class Service(Base, UUIDCreatableMixin, CreatableMixin):
     user_id = Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), unique=False, nullable=False
     )
+    user = relationship("User", back_populates="services")
     token = Column(UnicodeText, unique=False, nullable=False, default=uuid4().hex)
     name = Column(UnicodeText, nullable=False)
     type = Column(UnicodeText, nullable=False)
