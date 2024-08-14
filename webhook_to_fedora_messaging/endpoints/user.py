@@ -11,6 +11,7 @@ from starlette.status import (
     HTTP_422_UNPROCESSABLE_ENTITY,
 )
 
+from webhook_to_fedora_messaging.auth import current_user
 from webhook_to_fedora_messaging.database import get_session
 from webhook_to_fedora_messaging.endpoints.models.user import (
     UserManyResult,
@@ -37,6 +38,16 @@ async def search_user(username: str, session: AsyncSession = Depends(get_session
     return {"data": result.scalars().all()}
 
 
+@router.get("/me", status_code=HTTP_200_OK, response_model=UserResult, tags=["users"])
+async def get_me(
+    user: User = Depends(current_user),  # noqa : B008
+):
+    """
+    Return the user with the specified username
+    """
+    return {"data": user}
+
+
 @router.get("/{username}", status_code=HTTP_200_OK, response_model=UserResult, tags=["users"])
 async def get_user(
     username: str,
@@ -45,8 +56,6 @@ async def get_user(
     """
     Return the user with the specified username
     """
-    if username.strip() == "":
-        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, "No lookup string provided")
     query = select(User).filter_by(name=username).options(selectinload("*"))
     result = await session.execute(query)
     try:
