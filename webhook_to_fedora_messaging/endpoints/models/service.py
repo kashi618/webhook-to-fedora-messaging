@@ -16,20 +16,21 @@ class ServiceBase(BaseModel, ABC):
     """
 
     model_config = ConfigDict(from_attributes=True)
-
-
-class ServiceExternal(ServiceBase):
     uuid: str
     name: str
     type: ServiceType
     desc: str
     token: str
-    user_id: int
     creation_date: datetime
 
 
-class ServiceInternal(ServiceExternal):
+class ServiceExternal(ServiceBase):
+    pass
+
+
+class ServiceInternal(ServiceBase):
     id: str
+    user_id: int
 
 
 class ServiceRequestMain(BaseModel):

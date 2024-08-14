@@ -11,15 +11,16 @@ class UserBase(BaseModel, ABC):
     """
 
     model_config = ConfigDict(from_attributes=True)
-
-
-class UserExternal(UserBase):
     name: str
     is_admin: bool = False
     creation_date: datetime
 
 
-class UserInternal(UserExternal):
+class UserExternal(UserBase):
+    pass
+
+
+class UserInternal(UserBase):
     id: str
 
 
