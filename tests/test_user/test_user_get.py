@@ -25,6 +25,5 @@ async def test_user_get(client, authenticated, db_user, username, code):
                 "creation_date": db_user.creation_date.isoformat(),
                 "is_admin": False,
                 "name": db_user.name,
-                "uuid": db_user.uuid,
             },
         }

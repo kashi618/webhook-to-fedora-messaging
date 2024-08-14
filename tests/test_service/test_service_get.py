@@ -8,7 +8,6 @@ async def test_service_lookup(client, authenticated, db_service):
             "name": db_service.name,
             "token": db_service.token,
             "type": db_service.type,
-            "user_id": db_service.user_id,
             "uuid": db_service.uuid,
         },
     }

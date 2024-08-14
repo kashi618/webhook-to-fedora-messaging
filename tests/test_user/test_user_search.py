@@ -7,7 +7,6 @@ async def test_user_search(client, db_user):
                 "creation_date": db_user.creation_date.isoformat(),
                 "is_admin": False,
                 "name": db_user.name,
-                "uuid": db_user.uuid,
             }
         ]
     }
