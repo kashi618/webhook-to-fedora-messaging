@@ -16,7 +16,6 @@ from starlette.status import (
 from webhook_to_fedora_messaging.auth import current_user
 from webhook_to_fedora_messaging.database import get_session
 from webhook_to_fedora_messaging.endpoints.models.service import (
-    ServiceExternal,
     ServiceManyResult,
     ServiceRequest,
     ServiceResult,
@@ -52,7 +51,7 @@ async def create_service(
     except IntegrityError as expt:
         logger.exception("Uniqueness constraint failed")
         raise HTTPException(HTTP_409_CONFLICT, "Uniqueness constraint failed") from expt
-    return {"data": ServiceExternal.model_validate(made_service).model_dump()}
+    return {"data": made_service}
 
 
 @router.get("", status_code=HTTP_200_OK, response_model=ServiceManyResult, tags=["services"])
@@ -65,7 +64,7 @@ async def list_services(
     """
     query = select(Service).where(Service.user_id == user.id)
     service_data = await session.scalars(query)
-    return {"data": [ServiceExternal.model_validate(srvc).model_dump() for srvc in service_data]}
+    return {"data": service_data}
 
 
 @router.get("/{uuid}", status_code=HTTP_200_OK, response_model=ServiceResult, tags=["services"])
@@ -76,7 +75,7 @@ async def get_service(
     """
     Return the service with the specified UUID
     """
-    return {"data": ServiceExternal.model_validate(service).model_dump()}
+    return {"data": service}
 
 
 @router.put(
@@ -91,7 +90,7 @@ async def revoke_service(
     """
     service.disabled = True
     await session.flush()
-    return {"data": ServiceExternal.model_validate(service).model_dump()}
+    return {"data": service}
 
 
 @router.put(
@@ -125,7 +124,7 @@ async def update_service(
 
     await session.flush()
 
-    return {"data": ServiceExternal.model_validate(service).model_dump()}
+    return {"data": service}
 
 
 @router.put(
@@ -143,4 +142,4 @@ async def regenerate_token(
     """
     service.token = uuid4().hex
     await session.flush()
-    return {"data": ServiceExternal.model_validate(service).model_dump()}
+    return {"data": service}

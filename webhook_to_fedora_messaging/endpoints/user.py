@@ -17,7 +17,6 @@ from starlette.status import (
 from webhook_to_fedora_messaging.auth import current_user
 from webhook_to_fedora_messaging.database import get_session
 from webhook_to_fedora_messaging.endpoints.models.user import (
-    UserExternal,
     UserManyResult,
     UserRequest,
     UserResult,
@@ -45,7 +44,7 @@ async def create_user(
     except IntegrityError as expt:
         logger.exception("Uniqueness constraint failed")
         raise HTTPException(HTTP_409_CONFLICT, "Uniqueness constraint failed") from expt
-    return {"data": UserExternal.model_validate(made_user).model_dump()}
+    return {"data": made_user}
 
 
 @router.get(
@@ -59,9 +58,7 @@ async def search_user(username: str, session: AsyncSession = Depends(get_session
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, "No lookup string provided")
     query = select(User).where(User.name.like(f"%{username}%"))
     result = await session.execute(query)
-    return {
-        "data": [UserExternal.model_validate(user).model_dump() for user in result.scalars().all()]
-    }
+    return {"data": result.scalars().all()}
 
 
 @router.get("/{username}", status_code=HTTP_200_OK, response_model=UserResult, tags=["users"])
@@ -82,4 +79,4 @@ async def get_user(
         raise HTTPException(
             HTTP_404_NOT_FOUND, f"User with the requested username '{username}' was not found"
         ) from expt
-    return {"data": UserExternal.model_validate(user_data).model_dump()}
+    return {"data": user_data}
