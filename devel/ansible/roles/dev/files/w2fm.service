@@ -6,6 +6,8 @@
 Description=fmn-api
 After=network-online.target
 Wants=network-online.target
+After=synced-folder@webhook-to-fedora-messaging.service
+Requires=synced-folder@webhook-to-fedora-messaging.service
 
 [Service]
 AmbientCapabilities = CAP_NET_BIND_SERVICE
