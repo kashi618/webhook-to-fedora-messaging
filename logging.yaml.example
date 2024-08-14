@@ -43,7 +43,15 @@ loggers:
     handlers: ["access"]
     level: "INFO"
     propagate: false
+  alembic:
+    handlers: ["console"]
+    level: "WARNING"
+    propagate: false
+  webhook_to_fedora_messaging:
+    handlers: ["console"]
+    level: "DEBUG"
+    propagate: false
 
 root:
-  level: "DEBUG"
+  level: "INFO"
   handlers: ["console"]
