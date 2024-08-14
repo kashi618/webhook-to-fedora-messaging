@@ -14,7 +14,6 @@ class UserBase(BaseModel, ABC):
 
 
 class UserExternal(UserBase):
-    uuid: str
     name: str
     is_admin: bool = False
     creation_date: datetime

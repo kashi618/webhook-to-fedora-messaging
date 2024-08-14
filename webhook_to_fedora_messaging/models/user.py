@@ -6,10 +6,10 @@ from sqlalchemy import Boolean, Column, Integer, UnicodeText
 from sqlalchemy.orm import relationship
 
 from webhook_to_fedora_messaging.database import Base
-from webhook_to_fedora_messaging.models.util import CreatableMixin, UUIDCreatableMixin
+from webhook_to_fedora_messaging.models.util import CreatableMixin
 
 
-class User(Base, UUIDCreatableMixin, CreatableMixin):
+class User(Base, CreatableMixin):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, nullable=False)
