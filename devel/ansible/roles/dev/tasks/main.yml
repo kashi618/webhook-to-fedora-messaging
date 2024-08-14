@@ -81,6 +81,16 @@
     chdir: /home/vagrant/webhook-to-fedora-messaging
     creates: /home/vagrant/w2fm.db
 
+- name: setup the bash config dir
+  file:
+    path: /home/vagrant/.bashrc.d
+    state: directory
+
+- name: setup the environment variable
+  copy:
+    src: bashrc
+    dest: /home/vagrant/.bashrc.d/w2fm
+
 - name: Install the systemd unit files
   copy:
     src: "{{ item }}"
