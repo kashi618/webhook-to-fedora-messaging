@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from unittest import mock
 
 import pytest
-from fedora_messaging.testing import mock_sends
+from twisted.internet import defer
 from webhook_to_fedora_messaging_messages.github import GithubMessageV1
 
 
@@ -47,16 +47,33 @@ def fasjson_client():
         yield client
 
 
-async def test_message_create(client, db_service, request_data, request_headers, fasjson_client):
+@pytest.fixture
+def sent_messages():
+    sent = []
+
+    def _add_and_return(message, exchange=None):
+        sent.append(message)
+        return defer.succeed(None)
+
+    with mock.patch(
+        "webhook_to_fedora_messaging.publishing.api.twisted_publish", side_effect=_add_and_return
+    ):
+        yield sent
+
+
+async def test_message_create(
+    client, db_service, request_data, request_headers, fasjson_client, sent_messages
+):
     fasjson_client.search.return_value = SimpleNamespace(
         result=[{"username": "dummy-fas-username"}]
     )
-    with mock_sends(GithubMessageV1) as sent_msgs:
-        response = await client.post(
-            f"/api/v1/messages/{db_service.uuid}", content=request_data, headers=request_headers
-        )
-        assert response.status_code == 202, response.text
-    sent_msg = sent_msgs[0]
+    response = await client.post(
+        f"/api/v1/messages/{db_service.uuid}", content=request_data, headers=request_headers
+    )
+    assert response.status_code == 202, response.text
+    assert len(sent_messages) == 1
+    sent_msg = sent_messages[0]
+    assert isinstance(sent_msg, GithubMessageV1)
     assert sent_msg.topic == "github.push"
     assert sent_msg.agent_name == "dummy-fas-username"
     assert sent_msg.body["body"] == json.loads(request_data)

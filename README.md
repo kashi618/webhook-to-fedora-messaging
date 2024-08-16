@@ -74,12 +74,12 @@
     Example output
     ```
     Usage: w2fm [OPTIONS] COMMAND [ARGS]...
-    
+
     Options:
       -c, --conf PATH  Read configuration from the specified module
       --version        Show the version and exit.
       --help           Show this message and exit.
-    
+
     Commands:
       setup  Setup the database schema in the specified environment
     ```
