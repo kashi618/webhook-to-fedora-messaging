@@ -2,7 +2,6 @@ import hashlib
 import hmac
 import json
 import pathlib
-from types import SimpleNamespace
 from unittest import mock
 
 import pytest
@@ -41,7 +40,7 @@ def request_headers(db_service, request_data):
 def fasjson_client():
     client = mock.Mock(name="fasjson")
     with mock.patch(
-        "webhook_to_fedora_messaging.endpoints.parser.github.fasjson_client.Client",
+        "webhook_to_fedora_messaging.endpoints.parser.github.get_fasjson",
         return_value=client,
     ):
         yield client
@@ -64,9 +63,7 @@ def sent_messages():
 async def test_message_create(
     client, db_service, request_data, request_headers, fasjson_client, sent_messages
 ):
-    fasjson_client.search.return_value = SimpleNamespace(
-        result=[{"username": "dummy-fas-username"}]
-    )
+    fasjson_client.get_username_from_github = mock.AsyncMock(return_value="dummy-fas-username")
     response = await client.post(
         f"/api/v1/messages/{db_service.uuid}", content=request_data, headers=request_headers
     )

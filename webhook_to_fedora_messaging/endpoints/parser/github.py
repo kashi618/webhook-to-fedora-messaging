@@ -2,12 +2,11 @@ import hashlib
 import hmac
 import json
 
-import fasjson_client
 from starlette.requests import Request
 from webhook_to_fedora_messaging_messages.github import GithubMessageV1
 
-from webhook_to_fedora_messaging.config import get_config
 from webhook_to_fedora_messaging.exceptions import SignatureMatchError
+from webhook_to_fedora_messaging.fasjson import get_fasjson
 
 
 async def github_parser(token: str, request: Request) -> GithubMessageV1:
@@ -29,7 +28,8 @@ async def github_parser(token: str, request: Request) -> GithubMessageV1:
         raise SignatureMatchError("Message Signature Couldn't be Matched.")
 
     topic = f"github.{headers['x-github-event']}"
-    agent = fas_by_github(body["sender"]["login"])  # FASJSON
+    fasjson = get_fasjson()
+    agent = await fasjson.get_username_from_github(body["sender"]["login"])
     return GithubMessageV1(topic=topic, body={"body": body, "headers": headers, "agent": agent})
 
 
@@ -52,16 +52,3 @@ def verify_signature(token: str, signature_header: str, body: bytes) -> bool:
     expected_signature = "sha256=" + hash_object.hexdigest()
 
     return hmac.compare_digest(expected_signature, signature_header)
-
-
-def fas_by_github(username: str) -> str:
-    """Get the Fedora Account System Username of the given GitHub username
-
-    Args:
-        username: GitHub Username"""
-
-    fasjson = fasjson_client.Client(get_config().fasjson_url)
-    response = fasjson.search(github_username=username)
-    if response.result and len(response.result) == 1:
-        return response.result[0]["username"]
-    return None
