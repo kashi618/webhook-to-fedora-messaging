@@ -1,9 +1,9 @@
-import asyncio
 import logging
 import sys
 import traceback
 
 import backoff
+from fastapi.concurrency import run_in_threadpool
 from fedora_messaging import api
 from fedora_messaging import exceptions as fm_exceptions
 
@@ -27,6 +27,4 @@ def giveup_hdlr(details):
     on_giveup=giveup_hdlr,
 )
 async def publish(message):
-    deferred = api.twisted_publish(message)
-    loop = asyncio.get_running_loop()
-    await deferred.asFuture(loop)
+    await run_in_threadpool(api.publish, message)

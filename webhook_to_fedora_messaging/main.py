@@ -32,6 +32,7 @@ tags_metadata = [
 PREFIX = "/api/v1"
 
 
+# from contextlib import asynccontextmanager
 # @asynccontextmanager
 # async def lifespan(app: FastAPI):
 #     setup_config()
