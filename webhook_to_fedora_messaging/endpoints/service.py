@@ -43,14 +43,14 @@ async def create_service(
         uuid=uuid4().hex[0:8],
         type=body.data.type,
         desc=body.data.desc,
-        user_id=user.id,
     )
     session.add(made_service)
     try:
         await session.flush()
     except IntegrityError as expt:
         logger.exception("Uniqueness constraint failed")
-        raise HTTPException(HTTP_409_CONFLICT, "Uniqueness constraint failed") from expt
+        raise HTTPException(HTTP_409_CONFLICT, "This service already exists") from expt
+    (await made_service.awaitable_attrs.users).append(user)
     return {"data": made_service}
 
 
@@ -62,7 +62,7 @@ async def list_services(
     """
     List all the services associated with a certain user
     """
-    query = select(Service).where(Service.user_id == user.id)
+    query = select(Service).where(Service.users.contains(user))
     service_data = await session.scalars(query)
     return {"data": service_data}
 
@@ -114,13 +114,14 @@ async def update_service(
         query = select(User).filter_by(name=body.data.username)
         result = await session.execute(query)
         try:
-            user_data = result.scalar_one()
+            user = result.scalar_one()
         except NoResultFound as expt:
             raise HTTPException(
                 HTTP_422_UNPROCESSABLE_ENTITY,
                 "Service was attempted to be transferred to a non-existent user",
             ) from expt
-        service.user_id = user_data.id
+        if user not in service.users:
+            service.users.append(user)
 
     await session.flush()
 

@@ -32,6 +32,8 @@ LOGGING_CONFIG = "logging.yaml.example"
 
 @pytest.fixture()
 async def db(app_config):
+    from webhook_to_fedora_messaging import models  # noqa: F401
+
     get_db_manager.cache_clear()
     db_mgr = get_db_manager()
     await db_mgr.sync()
@@ -91,11 +93,12 @@ async def db_service(client, db_user, db_session) -> AsyncGenerator[Service, Non
         name="GitHub Demo",
         type="github",
         desc="description",
-        user_id=db_user.id,
     )
-
     service.token = "dummy-service-token"  # noqa: S105
+    await db_session.flush()
+    (await service.awaitable_attrs.users).append(db_user)
     await db_session.commit()
+
     # Refreshing seems necessary on sqlite because it does not support timezones in timestamps
     await db_session.refresh(service)
 

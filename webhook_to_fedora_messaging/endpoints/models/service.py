@@ -30,7 +30,6 @@ class ServiceExternal(ServiceBase):
 
 class ServiceInternal(ServiceBase):
     id: str
-    user_id: int
 
 
 class ServiceRequestMain(BaseModel):

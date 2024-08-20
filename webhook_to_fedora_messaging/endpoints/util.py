@@ -20,7 +20,7 @@ async def is_uuid_vacant(uuid: str) -> str:
 async def return_service_from_uuid(
     uuid: str = Depends(is_uuid_vacant), session: AsyncSession = Depends(get_session)  # noqa : B008
 ) -> Service:
-    query = select(Service).filter_by(uuid=uuid).options(selectinload("*"))
+    query = select(Service).filter_by(uuid=uuid).options(selectinload(Service.users))
     result = await session.execute(query)
     try:
         service = result.scalar_one()
@@ -35,7 +35,7 @@ async def authorized_service_from_uuid(
     service: Service = Depends(return_service_from_uuid),  # noqa : B008
     user: User = Depends(current_user),  # noqa : B008
 ) -> Service:
-    if service.user_id != user.id:
+    if user not in service.users:
         raise HTTPException(
             HTTP_403_FORBIDDEN, f"You are not permitted to access the service '{service.uuid}'"
         )
