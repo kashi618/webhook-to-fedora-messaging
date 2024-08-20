@@ -15,7 +15,9 @@
     - common
     - ipa-client
     - cert
-    - gss-proxy
+    - name: gss-proxy
+      keytab_owner: vagrant
+      keytab_group: vagrant
     - name: oidc-register
       redirect_url: https://{{ ansible_fqdn }}/docs/oauth2-redirect
       public_client: true
