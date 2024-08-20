@@ -11,7 +11,9 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.requests import Request
 
 from webhook_to_fedora_messaging.config import get_config
 from webhook_to_fedora_messaging.endpoints import message, service, user
@@ -72,5 +74,10 @@ def create_app() -> FastAPI:
     app.include_router(user.router, prefix=PREFIX)
     app.include_router(service.router, prefix=PREFIX)
     app.include_router(message.router, prefix=PREFIX)
+
+    async def _redirect_to_docs(request: Request):
+        return RedirectResponse(app.docs_url)
+
+    app.add_route("/", _redirect_to_docs, include_in_schema=False)
 
     return app
