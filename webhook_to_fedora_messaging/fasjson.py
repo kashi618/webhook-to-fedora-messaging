@@ -43,7 +43,7 @@ class FASJSONAsyncProxy:
     async def get_username_from_github(self, username):
         try:
             users = await self.search_users(github_username=username)
-        except httpx.ReadTimeout:
+        except httpx.TimeoutException:
             log.exception("Timeout fetching the FAS user with Github username %r", username)
             return None
         if len(users) == 1:

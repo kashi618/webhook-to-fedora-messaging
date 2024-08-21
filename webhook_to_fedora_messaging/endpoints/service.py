@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.requests import Request
 from starlette.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
@@ -32,6 +33,7 @@ router = APIRouter(prefix="/services")
 @router.post("", status_code=HTTP_201_CREATED, response_model=ServiceResult, tags=["services"])
 async def create_service(
     body: ServiceRequest,
+    request: Request,
     session: AsyncSession = Depends(get_session),  # noqa : B008
     user: User = Depends(current_user),  # noqa : B008
 ):
@@ -51,11 +53,12 @@ async def create_service(
         logger.exception("Uniqueness constraint failed")
         raise HTTPException(HTTP_409_CONFLICT, "This service already exists") from expt
     (await made_service.awaitable_attrs.users).append(user)
-    return {"data": made_service}
+    return ServiceResult.model_validate({"data": made_service}, context={"request": request})
 
 
 @router.get("", status_code=HTTP_200_OK, response_model=ServiceManyResult, tags=["services"])
 async def list_services(
+    request: Request,
     session: AsyncSession = Depends(get_session),  # noqa : B008
     user: User = Depends(current_user),  # noqa : B008
 ):
@@ -64,24 +67,26 @@ async def list_services(
     """
     query = select(Service).where(Service.users.contains(user))
     service_data = await session.scalars(query)
-    return {"data": service_data}
+    return ServiceManyResult.model_validate({"data": service_data}, context={"request": request})
 
 
 @router.get("/{uuid}", status_code=HTTP_200_OK, response_model=ServiceResult, tags=["services"])
 async def get_service(
+    request: Request,
     session: AsyncSession = Depends(get_session),  # noqa : B008
     service: Service = Depends(authorized_service_from_uuid),  # noqa : B008
 ):
     """
     Return the service with the specified UUID
     """
-    return {"data": service}
+    return ServiceResult.model_validate({"data": service}, context={"request": request})
 
 
 @router.put(
     "/{uuid}/revoke", status_code=HTTP_202_ACCEPTED, response_model=ServiceResult, tags=["services"]
 )
 async def revoke_service(
+    request: Request,
     session: AsyncSession = Depends(get_session),  # noqa : B008
     service: Service = Depends(authorized_service_from_uuid),  # noqa : B008
 ):
@@ -90,7 +95,7 @@ async def revoke_service(
     """
     service.disabled = True
     await session.flush()
-    return {"data": service}
+    return ServiceResult.model_validate({"data": service}, context={"request": request})
 
 
 @router.put(
@@ -98,6 +103,7 @@ async def revoke_service(
 )
 async def update_service(
     body: ServiceUpdate,
+    request: Request,
     session: AsyncSession = Depends(get_session),  # noqa : B008
     service: Service = Depends(authorized_service_from_uuid),  # noqa : B008
 ):
@@ -125,7 +131,7 @@ async def update_service(
 
     await session.flush()
 
-    return {"data": service}
+    return ServiceResult.model_validate({"data": service}, context={"request": request})
 
 
 @router.put(
@@ -135,6 +141,7 @@ async def update_service(
     tags=["services"],
 )
 async def regenerate_token(
+    request: Request,
     session: AsyncSession = Depends(get_session),  # noqa : B008
     service: Service = Depends(authorized_service_from_uuid),  # noqa : B008
 ):
@@ -143,4 +150,4 @@ async def regenerate_token(
     """
     service.token = uuid4().hex
     await session.flush()
-    return {"data": service}
+    return ServiceResult.model_validate({"data": service}, context={"request": request})

@@ -10,6 +10,7 @@ async def test_service_list(client, authenticated, db_service):
                 "token": db_service.token,
                 "type": db_service.type,
                 "uuid": db_service.uuid,
+                "webhook_url": f"http://test/api/v1/messages/{db_service.uuid}",
             },
         ],
     }
