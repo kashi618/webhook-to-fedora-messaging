@@ -8,6 +8,7 @@ custom configuration file will be inherently taken from the default values
 """
 
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,7 +17,9 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.requests import Request
 
 from webhook_to_fedora_messaging.config import get_config
+from webhook_to_fedora_messaging.database import get_db_manager
 from webhook_to_fedora_messaging.endpoints import message, service, user
+from webhook_to_fedora_messaging.fasjson import get_fasjson
 
 
 logger = logging.getLogger(__name__)
@@ -32,12 +35,12 @@ tags_metadata = [
 PREFIX = "/api/v1"
 
 
-# from contextlib import asynccontextmanager
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     setup_config()
-#     setup_database_manager()
-#     yield
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Initialize and cache the DB manager and the FASJSON client
+    get_db_manager()
+    get_fasjson()
+    yield
 
 
 def create_app() -> FastAPI:
@@ -55,7 +58,7 @@ def create_app() -> FastAPI:
             "clientSecret": "",
             "scopes": config.oidc.scopes,
         },
-        # lifespan=lifespan,
+        lifespan=lifespan,
     )
 
     # We need this for auth to save temporary code & state in session.
