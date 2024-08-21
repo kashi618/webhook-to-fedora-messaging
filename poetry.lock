@@ -275,6 +275,25 @@ files = [
 ]
 
 [[package]]
+name = "cashews"
+version = "7.2.0"
+description = "cache tools with async power"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "cashews-7.2.0-py3-none-any.whl", hash = "sha256:31a203b30d6162ea671268fda9012ebc2053e669761a3112906aa7ec988f09eb"},
+    {file = "cashews-7.2.0.tar.gz", hash = "sha256:55be8f13845a17fc859c09b53d2105dd236340a5571610820b592e58835f62c2"},
+]
+
+[package.extras]
+dill = ["dill"]
+diskcache = ["diskcache (>=5.0.0)"]
+lint = ["mypy (>=1.5.0)", "types-redis"]
+redis = ["redis (>=4.3.1,!=5.0.1)"]
+speedup = ["bitarray (<3.0.0)", "hiredis", "xxhash (<4.0.0)"]
+tests = ["hypothesis (==6.111.0)", "pytest (==8.3.2)", "pytest-asyncio (==0.23.7)", "pytest-cov (==5.0.0)", "pytest-rerunfailures (==14.0)"]
+
+[[package]]
 name = "certifi"
 version = "2024.7.4"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -2834,4 +2853,4 @@ deploy = ["asyncpg", "uvicorn"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "04c38791173bc2c8a9dad35d502d7487714a426e109ef21331742f0d45b14509"
+content-hash = "3c74a8465f107bc801aca8f71c9ba1c432d988016bcabbf83d025bbe636fa038"

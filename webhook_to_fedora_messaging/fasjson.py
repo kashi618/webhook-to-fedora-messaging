@@ -4,8 +4,7 @@ from functools import cached_property as ft_cached_property
 from typing import Any
 
 import httpx
-
-# from cashews import cache
+from cashews import cache
 from httpx_gssapi import HTTPSPNEGOAuth
 
 from .config import get_config
@@ -33,7 +32,7 @@ class FASJSONAsyncProxy:
         response.raise_for_status()
         return response.json()
 
-    # @cache(ttl=30, prefix="v1")
+    @cache(ttl="1d", prefix="v1")
     async def search_users(
         self,
         **params: dict[str, Any],

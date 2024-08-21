@@ -6,6 +6,7 @@ import os
 from functools import cache
 from pathlib import Path
 from secrets import token_urlsafe
+from typing import Any
 
 from pydantic import BaseModel, DirectoryPath
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -47,6 +48,11 @@ class OIDCModel(BaseModel):
     )
 
 
+class CacheModel(BaseModel):
+    url: str = "mem://"
+    setup_args: dict[str, Any] | None = None
+
+
 class Config(BaseSettings):
     model_config = SettingsConfigDict(env_nested_delimiter="__")
 
@@ -54,6 +60,7 @@ class Config(BaseSettings):
     fasjson_url: str = "https://fasjson.fedoraproject.org"
     logging_config: Path = "/etc/webhook-to-fedora-messaging/logging.yaml"
     oidc: OIDCModel = OIDCModel()
+    cache: CacheModel = CacheModel()
     # It's fine if it changes on each startup: it's only used to temporarily store auth sessions
     session_secret: str = token_urlsafe(42)
 

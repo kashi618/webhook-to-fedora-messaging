@@ -16,6 +16,7 @@ from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.requests import Request
 
+from webhook_to_fedora_messaging.cache import configure_cache
 from webhook_to_fedora_messaging.config import get_config
 from webhook_to_fedora_messaging.database import get_db_manager
 from webhook_to_fedora_messaging.endpoints import message, service, user
@@ -37,8 +38,9 @@ PREFIX = "/api/v1"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize and cache the DB manager and the FASJSON client
+    # Initialize long-lived objects
     get_db_manager()
+    configure_cache()
     get_fasjson()
     yield
 
