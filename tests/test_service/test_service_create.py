@@ -32,6 +32,6 @@ async def test_service_conflict(client, authenticated, db_service, db_user):
         "type": db_service.type,
         "desc": db_service.desc,
     }
-
     response = await client.post("/api/v1/services", json={"data": data})
-    assert response.status_code == 409
+    assert response.status_code == 409, response.text
+    assert response.json() == {"detail": "This service already exists"}

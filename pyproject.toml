@@ -106,6 +106,7 @@ asyncio_mode = "auto"
 [tool.coverage.run]
 branch = true
 source = ["webhook_to_fedora_messaging"]
+concurrency = ["greenlet", "thread"]
 
 [tool.coverage.paths]
 source = ["webhook_to_fedora_messaging"]

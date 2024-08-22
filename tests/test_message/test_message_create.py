@@ -5,6 +5,7 @@ import pathlib
 from unittest import mock
 
 import pytest
+from fedora_messaging.exceptions import ConnectionException
 from twisted.internet import defer
 from webhook_to_fedora_messaging_messages.github import GithubMessageV1
 
@@ -81,6 +82,20 @@ async def test_message_create(
             "url": f"http://datagrepper.example.com/v2/id?id={sent_msg.id}&is_raw=true&size=extra-large",
         }
     }
+
+
+async def test_message_create_failure(
+    client, db_service, request_data, request_headers, fasjson_client
+):
+    fasjson_client.get_username_from_github = mock.AsyncMock(return_value="dummy-fas-username")
+    with mock.patch(
+        "webhook_to_fedora_messaging.publishing.api.twisted_publish",
+        side_effect=ConnectionException,
+    ):
+        response = await client.post(
+            f"/api/v1/messages/{db_service.uuid}", content=request_data, headers=request_headers
+        )
+    assert response.status_code == 502, response.text
 
 
 async def test_message_create_400(client, db_service, request_data, request_headers):

@@ -10,3 +10,9 @@ async def test_user_search(client, db_user):
             }
         ]
     }
+
+
+async def test_user_search_too_short(client, db_user):
+    response = await client.get("/api/v1/users/search/%20")
+    assert response.status_code == 422
+    assert response.json() == {"detail": "No lookup string provided"}
