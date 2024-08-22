@@ -8,7 +8,7 @@ from pathlib import Path
 from secrets import token_urlsafe
 from typing import Any
 
-from pydantic import BaseModel, DirectoryPath
+from pydantic import BaseModel, DirectoryPath, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -53,16 +53,24 @@ class CacheModel(BaseModel):
     setup_args: dict[str, Any] | None = None
 
 
+def url_no_trailing_slash(url: str) -> str:
+    return url.rstrip("/")
+
+
 class Config(BaseSettings):
     model_config = SettingsConfigDict(env_nested_delimiter="__")
 
     database: DBModel = DBModel()
     fasjson_url: str = "https://fasjson.fedoraproject.org"
+    datagrepper_url: str = "https://apps.fedoraproject.org/datagrepper"
     logging_config: Path = "/etc/webhook-to-fedora-messaging/logging.yaml"
     oidc: OIDCModel = OIDCModel()
     cache: CacheModel = CacheModel()
     # It's fine if it changes on each startup: it's only used to temporarily store auth sessions
     session_secret: str = token_urlsafe(42)
+
+    _normalize_fasjson_url = field_validator("fasjson_url")(url_no_trailing_slash)
+    _normalize_datagrepper_url = field_validator("datagrepper_url")(url_no_trailing_slash)
 
 
 @cache

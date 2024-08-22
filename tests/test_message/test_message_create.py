@@ -75,7 +75,12 @@ async def test_message_create(
     assert sent_msg.agent_name == "dummy-fas-username"
     assert sent_msg.body["body"] == json.loads(request_data)
 
-    assert response.json() == {"data": {"message_id": sent_msg.id}}
+    assert response.json() == {
+        "data": {
+            "message_id": sent_msg.id,
+            "url": f"http://datagrepper.example.com/v2/id?id={sent_msg.id}&is_raw=true&size=extra-large",
+        }
+    }
 
 
 async def test_message_create_400(client, db_service, request_data, request_headers):
