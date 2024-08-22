@@ -111,12 +111,12 @@ async def update_service(
     Update the service with the specified UUID
     """
     for attr in ("name", "type", "desc"):
-        data = getattr(body.data, attr).strip()
+        data = getattr(body.data, attr)
         if not data:
             continue
         setattr(service, attr, data)
 
-    if body.data.username.strip() != "":
+    if body.data.username:
         query = select(User).filter_by(name=body.data.username)
         result = await session.execute(query)
         try:

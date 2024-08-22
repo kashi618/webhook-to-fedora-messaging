@@ -27,7 +27,7 @@ class ServiceBase(BaseModel, ABC):
     uuid: str
     name: str
     type: ServiceType
-    desc: str
+    desc: str | None = None
     token: str
     creation_date: datetime
 
@@ -52,7 +52,7 @@ class ServiceRequestMain(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str
     type: ServiceType
-    desc: Optional[str]
+    desc: Optional[str] = None
 
 
 class ServiceRequest(BaseModel):
@@ -61,10 +61,10 @@ class ServiceRequest(BaseModel):
 
 class ServiceUpdateMain(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    name: Optional[str] = ""
-    type: Optional[str] = ""
-    desc: Optional[str] = ""
-    username: Optional[str] = ""
+    name: Optional[str] = None
+    type: Optional[str] = None
+    desc: Optional[str] = None
+    username: Optional[str] = None
 
 
 class ServiceUpdate(BaseModel):

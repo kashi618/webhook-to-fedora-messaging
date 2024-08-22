@@ -21,7 +21,7 @@ class Service(Base, UUIDCreatableMixin, CreatableMixin):
     token = Column(UnicodeText, unique=False, nullable=False, default=uuid4().hex)
     name = Column(UnicodeText, nullable=False)
     type = Column(UnicodeText, nullable=False)
-    desc = Column(UnicodeText, nullable=False)
+    desc = Column(UnicodeText, nullable=True)
     disabled = Column(Boolean, nullable=False, default=False)
     sent = Column(Integer, nullable=False, default=0)
     users = relationship("User", secondary=owners_table, back_populates="services")
