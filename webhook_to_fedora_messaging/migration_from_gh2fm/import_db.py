@@ -3,6 +3,7 @@ from asyncio import run
 from datetime import datetime
 from uuid import uuid4
 
+import click
 from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import selectinload
@@ -13,13 +14,10 @@ from webhook_to_fedora_messaging.models import Service, User
 from webhook_to_fedora_messaging.models.owners import owners_table
 
 
-userscsv_fileloca = "PATH_TO_USER_DATABASE_EXPORT_CSV"
-reposcsv_fileloca = "PATH_TO_REPO_DATABASE_EXPORT_CSV"
-pairscsv_fileloca = "PATH_TO_PAIR_DATABASE_EXPORT_CSV"
 format = "%d-%m-%Y %H:%M:%S"
 
 
-def read_user():
+def read_user(userscsv_fileloca):
     with open(userscsv_fileloca) as file:
         useriter = csv.reader(file)
         next(useriter)
@@ -27,7 +25,7 @@ def read_user():
             yield item[0]
 
 
-def read_repo():
+def read_repo(reposcsv_fileloca):
     with open(reposcsv_fileloca) as file:
         repoiter = csv.reader(file)
         next(repoiter)
@@ -35,7 +33,7 @@ def read_repo():
             yield item[1], item[2], item[4], item[5]
 
 
-def read_pair():
+def read_pair(userscsv_fileloca, pairscsv_fileloca):
     pair, userdict = dict(), dict()
     with open(userscsv_fileloca) as file:
         useriter = csv.reader(file)
@@ -53,9 +51,9 @@ def read_pair():
     return pair
 
 
-async def import_user_to_database():
+async def import_user_to_database(userscsv_fileloca):
     async for sess in get_session():
-        for item in read_user():
+        for item in read_user(userscsv_fileloca):
             try:
                 if "github_org" not in item:
                     make_user = User(name=item)
@@ -72,10 +70,10 @@ async def import_user_to_database():
         await sess.close()
 
 
-async def import_repo_to_database():
-    pairdata, done = read_pair(), set()
+async def import_repo_to_database(userscsv_fileloca, reposcsv_fileloca, pairscsv_fileloca):
+    pairdata, done = read_pair(userscsv_fileloca, pairscsv_fileloca), set()
     async for sess in get_session():
-        for item in read_repo():
+        for item in read_repo(reposcsv_fileloca):
             name, desc, team, active = item
             if active == "f":
                 continue
@@ -140,12 +138,26 @@ async def import_repo_to_database():
         await sess.close()
 
 
-async def main():
-    await import_user_to_database()
-    await import_repo_to_database()
+@click.command
+@click.option(
+    "-u", "--users", required=True, type=click.Path(readable=True), help="Path to the users CSV"
+)
+@click.option(
+    "-r", "--repos", required=True, type=click.Path(readable=True), help="Path to the repos CSV"
+)
+@click.option(
+    "-p", "--pairs", required=True, type=click.Path(readable=True), help="Path to the pairs CSV"
+)
+def main(users, repos, pairs):
+    # Ensure that the W2FM_CONFIG environment variable points towards the correct file
+    get_config()
+
+    async def _main():
+        await import_user_to_database(users)
+        await import_repo_to_database(users, repos, pairs)
+
+    run(_main())
 
 
 if __name__ == "__main__":
-    # Ensure that the W2FM_CONFIG environment variable points towards the correct file
-    conf = get_config()
-    run(main())
+    main()
