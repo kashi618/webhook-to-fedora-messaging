@@ -801,6 +801,29 @@ testing = ["covdefaults (>=2.3)", "coverage (>=7.3.2)", "diff-cover (>=8.0.1)", 
 typing = ["typing-extensions (>=4.8)"]
 
 [[package]]
+name = "gidgethub"
+version = "5.3.0"
+description = "An async GitHub API library"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "gidgethub-5.3.0-py3-none-any.whl", hash = "sha256:4dd92f2252d12756b13f9dd15cde322bfb0d625b6fb5d680da1567ec74b462c0"},
+    {file = "gidgethub-5.3.0.tar.gz", hash = "sha256:9ece7d37fbceb819b80560e7ed58f936e48a65d37ec5f56db79145156b426a25"},
+]
+
+[package.dependencies]
+PyJWT = {version = ">=2.4.0", extras = ["crypto"]}
+uritemplate = ">=3.0.1"
+
+[package.extras]
+aiohttp = ["aiohttp"]
+dev = ["aiohttp", "black", "coverage[toml] (>=5.0.3)", "httpx", "mypy", "pytest-cov", "pytest-xdist", "tornado"]
+doc = ["sphinx (>=4.0.0)", "sphinx-rtd-theme (>=0.5.2)"]
+httpx = ["httpx (>=0.16.1)"]
+test = ["importlib-resources", "pytest (>=5.4.1)", "pytest-asyncio", "pytest-tornasync"]
+tornado = ["tornado"]
+
+[[package]]
 name = "greenlet"
 version = "3.0.3"
 description = "Lightweight in-process concurrent programming"
@@ -1671,6 +1694,26 @@ files = [
 windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
+name = "pyjwt"
+version = "2.9.0"
+description = "JSON Web Token implementation in Python"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "PyJWT-2.9.0-py3-none-any.whl", hash = "sha256:3b02fb0f44517787776cf48f2ae25d8e14f300e6d7545a4315cee571a415e850"},
+    {file = "pyjwt-2.9.0.tar.gz", hash = "sha256:7e1e5b56cc735432a7369cbfa0efe50fa113ebecdc04ae6922deba8b84582d0c"},
+]
+
+[package.dependencies]
+cryptography = {version = ">=3.4.0", optional = true, markers = "extra == \"crypto\""}
+
+[package.extras]
+crypto = ["cryptography (>=3.4.0)"]
+dev = ["coverage[toml] (==5.0.4)", "cryptography (>=3.4.0)", "pre-commit", "pytest (>=6.0.0,<7.0.0)", "sphinx", "sphinx-rtd-theme", "zope.interface"]
+docs = ["sphinx", "sphinx-rtd-theme", "zope.interface"]
+tests = ["coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)"]
+
+[[package]]
 name = "pyopenssl"
 version = "24.2.1"
 description = "Python wrapper module around the OpenSSL library"
@@ -2418,6 +2461,17 @@ files = [
 ]
 
 [[package]]
+name = "uritemplate"
+version = "4.1.1"
+description = "Implementation of RFC 6570 URI Templates"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "uritemplate-4.1.1-py2.py3-none-any.whl", hash = "sha256:830c08b8d99bdd312ea4ead05994a38e8936266f84b9a7878232db50b044e02e"},
+    {file = "uritemplate-4.1.1.tar.gz", hash = "sha256:4346edfc5c3b79f694bccd6d6099a322bbeb628dbf2cd86eea55a456ce5124f0"},
+]
+
+[[package]]
 name = "urllib3"
 version = "2.2.2"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
@@ -2867,4 +2921,4 @@ deploy = ["asyncpg", "uvicorn"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "c78210eb7d3999073f663d6b1031b1ac1795a8a9b21f6535c9c6d2e20abf4a7a"
+content-hash = "a69916f973753851b21b95a38ba4e52c647204e96d8c93154b8e3fa4b1c21b39"

@@ -91,7 +91,10 @@ async def import_repo_to_database():
                         rslt = await sess.execute(qery)
                         user = rslt.scalar_one()
                     except NoResultFound:
-                        print(f"[{datetime.now().strftime(format)}] Service '{team}/{name}' abandoned.")
+                        print(
+                            f"[{datetime.now().strftime(format)}] "
+                            f"Service '{team}/{name}' abandoned."
+                        )
                         continue
 
                 # SERVICE IS TO BE CREATED ONLY IF FLAG IS 1 OR 2
@@ -101,7 +104,7 @@ async def import_repo_to_database():
                     uuid=uuid4().hex[0:8],
                     type="github",
                     desc=f"Migrated from GitHub2FedMsg. {desc}",
-                    disabled=False
+                    disabled=False,
                 )
                 sess.add(make_service)
                 await sess.flush()

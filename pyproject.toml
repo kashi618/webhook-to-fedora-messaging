@@ -74,6 +74,10 @@ pre-commit = ">=2.13"
 sphinxcontrib-napoleon = "*"
 pytest-asyncio = "^0.23.8 || ^0.24.0"
 
+
+[tool.poetry.group.scripts.dependencies]
+gidgethub = "^5.3.0"
+
 [tool.poetry.extras]
 deploy = ["uvicorn", "asyncpg"]
 
