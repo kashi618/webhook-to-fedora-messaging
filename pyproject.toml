@@ -128,6 +128,7 @@ exclude_lines = [
 omit = [
     "webhook_to_fedora_messaging/__init__.py",
     "webhook_to_fedora_messaging/migrations/env.py",
+    "webhook_to_fedora_messaging/migration_from_gh2fm/*",
     "tests/*",
 ]
 
