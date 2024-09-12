@@ -7,4 +7,5 @@
 exec uvicorn \
 	--host 0.0.0.0 --port 8080 \
 	--log-config /etc/webhook-to-fedora-messaging/logging.yaml \
+	--proxy-headers --forwarded-allow-ips='*' \
 	--factory webhook_to_fedora_messaging.main:create_app
