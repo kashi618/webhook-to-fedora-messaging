@@ -28,6 +28,7 @@ class FASJSONAsyncProxy:
 
     async def get(self, url: str, **kwargs) -> Any:
         """Query the API for a single result."""
+        kwargs["follow_redirects"] = True
         response = await self.client.get(url, **kwargs)
         response.raise_for_status()
         return response.json()
