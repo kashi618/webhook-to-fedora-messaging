@@ -1,6 +1,16 @@
 from contextlib import asynccontextmanager
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, MetaData, String, Table, Unicode
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    MetaData,
+    String,
+    Table,
+    Unicode,
+)
 from sqlalchemy.ext.asyncio import create_async_engine
 
 
@@ -14,6 +24,7 @@ users = Table(
     Column("emails", Unicode),
     Column("full_name", String),
     Column("oauth_access_token", Unicode),
+    Column("created_on", DateTime),
 )
 
 repos = Table(
