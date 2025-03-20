@@ -177,7 +177,7 @@ async def import_repo(db, repo_full_name, username, repo_description=""):
         f"""Hi @{username} !
 
 You can now add the following webhook to the """
-        '{"repo" if "/" in repo_full_name else "organization"} '
+        f'{"repo" if "/" in repo_full_name else "organization"} '
         "mentioned above."
     )
     if "/" in repo_full_name:
