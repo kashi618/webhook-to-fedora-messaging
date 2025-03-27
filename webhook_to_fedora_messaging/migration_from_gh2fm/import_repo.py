@@ -1,20 +1,17 @@
 import asyncio
 import logging
-from contextlib import asynccontextmanager
 from functools import lru_cache
-from uuid import uuid4
 
 import click
 from fasjson_client import Client as FasjsonClient
 from fasjson_client.errors import APIError as FasjsonApiError
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError, NoResultFound
+from sqlalchemy.exc import NoResultFound
 
 from webhook_to_fedora_messaging.config import set_config_file
-from webhook_to_fedora_messaging.database import get_session
+from webhook_to_fedora_messaging.crud import create_service
+from webhook_to_fedora_messaging.database import with_db_session
 from webhook_to_fedora_messaging.migration_from_gh2fm import gh2fm
-from webhook_to_fedora_messaging.models import Service, User
-from webhook_to_fedora_messaging.models.owners import owners_table
 
 
 log = logging.getLogger(__name__)
@@ -50,9 +47,6 @@ def main(config_path, github2fedmsg_db_url, debug, repo, fas_username):
         log.propagate = False
 
     asyncio.run(_main(repo, fas_username, github2fedmsg_db_url))
-
-
-with_db_session = asynccontextmanager(get_session)
 
 
 async def _main(repo_full_name, fas_username, github2fedmsg_db_url):
@@ -98,7 +92,16 @@ async def _main(repo_full_name, fas_username, github2fedmsg_db_url):
                 fas_username,
             )
         async with with_db_session() as db_session:
-            await import_repo(db_session, repo_full_name, fas_username)
+            try:
+                await create_service(
+                    db_session,
+                    service_type="github",
+                    service_name=repo_full_name,
+                    service_description="Migrated from GitHub2FedMsg.",
+                    owner=fas_username,
+                )
+            except ValueError as e:
+                log.warning(str(e))
 
 
 def _get_fasjson_url():
@@ -147,58 +150,6 @@ def _get_fas_username(username):
         log.error("FASJSON error on user %s: %s", username, e)
         raise click.Abort() from e
     return fas_user["username"]
-
-
-async def import_repo(db, repo_full_name, username, repo_description=""):
-    db_user = await db.scalar(select(User).where(User.name == username))
-    if not db_user:
-        db_user = User(name=username)
-        db.add(db_user)
-        log.debug("Adding user %s", username)
-        await db.flush()
-    db_service = Service(
-        name=f"{repo_full_name}",
-        uuid=uuid4().hex[0:8],
-        type="github",
-        desc=f"Migrated from GitHub2FedMsg. {repo_description}".strip(),
-        disabled=False,
-    )
-    db.add(db_service)
-    try:
-        await db.flush()
-    except IntegrityError:
-        log.warning("Service already exists.")
-        await db.rollback()
-        return
-    stmt = owners_table.insert().values({"service_id": db_service.id, "user_id": db_user.id})
-    await db.execute(stmt)
-    log.info("Service %s created", db_service.name)
-    print(
-        f"""Hi @{username} !
-
-You can now add the following webhook to the """
-        f'{"repo" if "/" in repo_full_name else "organization"} '
-        "mentioned above."
-    )
-    if "/" in repo_full_name:
-        user_or_org, repo_name = repo_full_name.split("/")
-        print(
-            f"Note that you can also add the webhook at the organization level (`{user_or_org}`), "
-            "which will make it active for all the organization's repos. I would suggest doing "
-            "that to save some effort and automatically cover repos you may add in the future "
-            "(make sure however than another teammate hasn't already added it)."
-        )
-    print(
-        f"""
-```
-Webhook URL: https://webhook.fedoraproject.org/api/v1/messages/{db_service.uuid}
-Secret: {db_service.token}
-Webhook content-type: application/json
-```
-
-Please tell us if there are any issues! Thanks!
-"""
-    )
 
 
 if __name__ == "__main__":

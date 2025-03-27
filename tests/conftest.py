@@ -45,7 +45,9 @@ async def db(app_config):
 @pytest.fixture()
 async def db_session(db):
     session = db.Session()
-    yield session
+    with mock.patch("webhook_to_fedora_messaging.database.get_session") as get_session:
+        get_session.return_value = session
+        yield session
     await session.close()
 
 

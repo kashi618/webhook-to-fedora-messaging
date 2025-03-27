@@ -9,7 +9,8 @@ from sqlalchemy_helpers.aio import SyncResult
 
 from webhook_to_fedora_messaging import __version__
 from webhook_to_fedora_messaging.config import get_config, set_config_file
-from webhook_to_fedora_messaging.database import get_db_manager, setup_database
+from webhook_to_fedora_messaging.crud import create_service
+from webhook_to_fedora_messaging.database import get_db_manager, setup_database, with_db_session
 
 
 logger = logging.getLogger(__name__)
@@ -43,3 +44,22 @@ def setup():
         click.echo("The database has been created")
     elif result == SyncResult.UPGRADED:
         click.echo("The database has been upgraded")
+
+
+@main.command(name="create", help="Create a new service")
+@click.option("--service", required=True)
+@click.option("--type", "service_type", required=True)
+@click.option("--owner", required=True)
+@click.option("--description")
+def create(service, service_type, owner, description):
+    async def _main():
+        async with with_db_session() as db_session:
+            await create_service(
+                db_session,
+                service_type=service_type,
+                service_name=service,
+                service_description=description,
+                owner=owner,
+            )
+
+    run(_main())

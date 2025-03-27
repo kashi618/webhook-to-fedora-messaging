@@ -9,6 +9,7 @@ Import the functions we will use in the main code and in migrations.
 """
 
 from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from functools import cache
 
 from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncSession
@@ -44,3 +45,6 @@ async def get_session() -> AsyncIterator[AsyncSession]:
     db = get_db_manager()
     async for session in make_db_session(db):
         yield session
+
+
+with_db_session = asynccontextmanager(get_session)
