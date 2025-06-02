@@ -37,12 +37,12 @@ class ServiceExternal(ServiceBase):
     webhook_url: HttpUrl | None = None
 
     @model_validator(mode="after")
-    def build_url(cls, data: "ServiceExternal", info: ValidationInfo):
-        if data.webhook_url is None and info.context is None:
+    def build_url(self, info: ValidationInfo):
+        if self.webhook_url is None and info.context is None:
             raise ValidationError("The request must be set in the context of model_validate()")
         request: Request = info.context["request"]
-        data.webhook_url = HttpUrl(str(request.url_for("create_message", uuid=data.uuid)))
-        return data
+        self.webhook_url = HttpUrl(str(request.url_for("create_message", uuid=self.uuid)))
+        return self
 
 
 class ServiceInternal(ServiceBase):
