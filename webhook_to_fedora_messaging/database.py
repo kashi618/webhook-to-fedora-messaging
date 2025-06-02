@@ -12,20 +12,16 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from functools import cache
 
-from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy_helpers.aio import (  # noqa: F401
     AsyncDatabaseManager,
+    Base,
     get_or_create,
     update_or_create,
 )
 from sqlalchemy_helpers.fastapi import make_db_session, manager_from_config
-from sqlalchemy_helpers.manager import get_base
 
 from .config import get_config
-
-
-# Add https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#preventing-implicit-io-when-using-asyncsession
-Base = get_base(cls=AsyncAttrs)
 
 
 @cache
