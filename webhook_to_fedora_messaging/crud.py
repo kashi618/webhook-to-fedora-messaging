@@ -21,7 +21,7 @@ async def create_service(
     service_type: str,
     service_name: str,
     owner: str,
-    service_description: str = "",
+    service_description: str | None = None,
 ) -> Service:
     db_user = await db.scalar(select(User).where(User.name == owner))
     if not db_user:
