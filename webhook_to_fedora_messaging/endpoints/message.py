@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fedora_messaging import exceptions as fm_exceptions
@@ -10,7 +9,7 @@ from ..models import Service
 from ..publishing import publish
 from .models.message import MessageResult
 from .parser import parser
-from .util import return_service_from_uuid
+from .util import return_service_from_uuid, SerializedModel
 
 
 logger = logging.getLogger(__name__)
@@ -28,7 +27,7 @@ async def create_message(
     body: dict,
     request: Request,
     service: Service = Depends(return_service_from_uuid),  # noqa : B008
-) -> dict[str, Any]:
+) -> SerializedModel:
     """
     Create a message with the requested attributes
     """

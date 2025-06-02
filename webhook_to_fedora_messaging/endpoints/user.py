@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
@@ -19,6 +18,7 @@ from .models.user import (
     UserManyResult,
     UserResult,
 )
+from .util import SerializedModel
 
 
 logger = logging.getLogger(__name__)
@@ -30,7 +30,7 @@ router = APIRouter(prefix="/users")
 )
 async def search_user(
     username: str, session: AsyncSession = Depends(get_session)  # noqa : B008
-) -> dict[str, Any]:
+) -> SerializedModel:
     """
     Return the list of users matching the specified username
     """
@@ -44,7 +44,7 @@ async def search_user(
 @router.get("/me", status_code=HTTP_200_OK, response_model=UserResult, tags=["users"])
 async def get_me(
     user: User = Depends(current_user),  # noqa : B008
-) -> dict[str, Any]:
+) -> SerializedModel:
     """
     Return the user with the specified username
     """
@@ -55,7 +55,7 @@ async def get_me(
 async def get_user(
     username: str,
     session: AsyncSession = Depends(get_session),  # noqa : B008
-) -> dict[str, Any]:
+) -> SerializedModel:
     """
     Return the user with the specified username
     """

@@ -1,3 +1,5 @@
+from typing import Any, Literal, TypeAlias
+
 from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
@@ -9,6 +11,9 @@ from ..auth import current_user
 from ..database import get_session
 from ..models.service import Service
 from ..models.user import User
+
+
+SerializedModel: TypeAlias = dict[Literal["data"], Any]
 
 
 async def is_uuid_vacant(uuid: str) -> str:
