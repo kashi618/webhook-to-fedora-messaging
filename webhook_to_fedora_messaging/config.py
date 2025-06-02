@@ -63,7 +63,7 @@ class Config(BaseSettings):
     database: DBModel = DBModel()
     fasjson_url: str = "https://fasjson.fedoraproject.org"
     datagrepper_url: str = "https://apps.fedoraproject.org/datagrepper"
-    logging_config: Path = "/etc/webhook-to-fedora-messaging/logging.yaml"
+    logging_config: Path = Path("/etc/webhook-to-fedora-messaging/logging.yaml")
     oidc: OIDCModel = OIDCModel()
     cache: CacheModel = CacheModel()
     # It's fine if it changes on each startup: it's only used to temporarily store auth sessions

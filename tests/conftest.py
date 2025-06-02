@@ -7,7 +7,7 @@ from pathlib import PosixPath
 from unittest import mock
 
 import pytest
-from httpx import ASGITransport, AsyncClient
+from httpx import ASGITransport, AsyncClient, Headers
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy_helpers.aio import AsyncDatabaseManager
 
@@ -103,7 +103,7 @@ async def authenticated(db_user: User, client: AsyncClient) -> AsyncGenerator[mo
     }
     with mock.patch("webhook_to_fedora_messaging.auth.oauth") as oauth:
         oauth.fedora.userinfo = mock.AsyncMock(return_value=oidc_user)
-        client.headers = {"Authorization": "Bearer dummy-token"}
+        client.headers = Headers({"Authorization": "Bearer dummy-token"})
         yield oauth
 
 

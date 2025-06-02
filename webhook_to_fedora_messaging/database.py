@@ -8,7 +8,7 @@ Use sqlalchemy-helpers.
 Import the functions we will use in the main code and in migrations.
 """
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from functools import cache
 
@@ -38,7 +38,7 @@ async def setup_database():
     return await db.sync()
 
 
-async def get_session() -> AsyncIterator[AsyncSession]:
+async def get_session() -> AsyncGenerator[AsyncSession]:
     db = get_db_manager()
     async for session in make_db_session(db):
         yield session

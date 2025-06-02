@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Optional
+from typing import Optional, Self
 
 from pydantic import (
     BaseModel,
@@ -24,7 +24,7 @@ class MessageExternal(MessageBase):
     url: Optional[HttpUrl] = None
 
     @model_validator(mode="after")
-    def build_url(self):
+    def build_url(self) -> Self:
         base_url = get_config().datagrepper_url
         self.url = HttpUrl(f"{base_url}/v2/id?id={self.message_id}&is_raw=true&size=extra-large")
         return self

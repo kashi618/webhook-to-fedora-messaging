@@ -89,7 +89,7 @@ def run_sync_migrations() -> None:
     """
 
     connectable = engine_from_config(
-        alembic_config.get_section(alembic_config.config_ini_section),
+        alembic_config.get_section(alembic_config.config_ini_section) or {},
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )

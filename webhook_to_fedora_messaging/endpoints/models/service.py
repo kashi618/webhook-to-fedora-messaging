@@ -1,7 +1,7 @@
 from abc import ABC
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import cast, Optional, Self
 
 from pydantic import (
     BaseModel,
@@ -37,10 +37,10 @@ class ServiceExternal(ServiceBase):
     webhook_url: HttpUrl | None = None
 
     @model_validator(mode="after")
-    def build_url(self, info: ValidationInfo):
+    def build_url(self, info: ValidationInfo) -> Self:
         if self.webhook_url is None and info.context is None:
             raise ValidationError("The request must be set in the context of model_validate()")
-        request: Request = info.context["request"]
+        request: Request = cast(dict, info.context)["request"]
         self.webhook_url = HttpUrl(str(request.url_for("create_message", uuid=self.uuid)))
         return self
 

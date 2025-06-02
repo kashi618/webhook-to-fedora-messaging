@@ -86,7 +86,7 @@ def create_app() -> FastAPI:
     app.include_router(message.router, prefix=PREFIX)
 
     async def _redirect_to_docs(request: Request):
-        return RedirectResponse(app.docs_url)
+        return RedirectResponse(app.docs_url or "/docs")
 
     app.add_route("/", _redirect_to_docs, include_in_schema=False)
 

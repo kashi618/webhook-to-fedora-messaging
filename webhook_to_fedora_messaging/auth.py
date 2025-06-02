@@ -35,8 +35,8 @@ oauth.register(
 class OIDCUser(BaseModel):
     nickname: str
     email: str
-    name: str = None
-    preferred_username: str = None
+    name: str | None = None
+    preferred_username: str | None = None
     groups: list[str] = Field(default_factory=list)
     sub: str
 
@@ -46,6 +46,8 @@ async def current_user(
     session: AsyncSession = Depends(get_session),  # noqa : B008
 ) -> User:
     # Read the token
+    if not token:
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="No token")
     try:
         token_type, token = token.split(" ", 1)
     except ValueError as e:
