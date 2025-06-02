@@ -75,6 +75,8 @@ pre-commit = ">=2.13"
 sphinxcontrib-napoleon = "*"
 pytest-asyncio = "^0.23.8 || ^0.24.0 || ^0.25.0 || ^0.26.0"
 pytest-spec = "^4.0"
+mypy = "^1.15.0"
+types-pyyaml = "^6.0.12.20250516"
 
 
 [tool.poetry.group.scripts.dependencies]
@@ -82,6 +84,9 @@ gidgethub = "^5.3.0"
 
 [tool.poetry.extras]
 deploy = ["uvicorn", "asyncpg"]
+
+[tool.poetry.scripts]
+w2fm = "webhook_to_fedora_messaging.cli:main"
 
 [build-system]
 requires = ["poetry-core"]
@@ -175,5 +180,25 @@ directory = "fixed"
 name = "Fixed"
 showcontent = true
 
-[tool.poetry.scripts]
-w2fm = "webhook_to_fedora_messaging.cli:main"
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["fedora_messaging.*"]
+follow_untyped_imports = true
+
+[[tool.mypy.overrides]]
+module = ["fasjson_client.*"]
+follow_untyped_imports = true
+
+[[tool.mypy.overrides]]
+module = ["webhook_to_fedora_messaging_messages.*"]
+follow_untyped_imports = true
+
+[[tool.mypy.overrides]]
+module = ["httpx_gssapi.*", "authlib.*"]
+follow_untyped_imports = true
+
+[[tool.mypy.overrides]]
+module = ["webhook_to_fedora_messaging.migration_from_gh2fm.*"]
+ignore_errors = true
