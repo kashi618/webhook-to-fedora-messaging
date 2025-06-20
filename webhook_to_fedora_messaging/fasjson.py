@@ -52,7 +52,7 @@ class FASJSONAsyncProxy:
 
     async def get_username_from_forgejo(self, username: str) -> str | None:
         # TODO: Revisit user retrieval using FASJSON once the FAS supports Forgejo Auth
-        return username
+        return None
 
 
 @ft_cache

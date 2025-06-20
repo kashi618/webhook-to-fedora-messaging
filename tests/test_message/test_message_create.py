@@ -129,7 +129,11 @@ async def test_message_create(
     sent_msg = sent_messages[0]
     assert isinstance(sent_msg, schema)
     assert sent_msg.topic == f"{kind}.push"
-    assert sent_msg.agent_name == username
+    if kind == "github":
+        assert sent_msg.agent_name == username
+    else:
+        # FAJSON only has mapping data for Github at the moment
+        assert sent_msg.agent_name is None
     assert sent_msg.body["body"] == json.loads(request_data)
     assert response.json() == {
         "data": {
